@@ -1,4 +1,4 @@
-#include "thermostat.h"
+#include "Thermostat.h"
 
 #define READ_COUNT      (10)
 #define AVS_TIME_LIMIT  (5) //in seconds

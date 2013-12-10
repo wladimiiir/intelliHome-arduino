@@ -1,10 +1,9 @@
 #ifndef _THERMOSTAT_H_
 #define _THERMOSTAT_H_
 
-#include "Arduino.h"
-#include "StandardCplusplus.h"
-#include "vector"
-
+#include <Arduino.h>
+#include <StandardCplusplus.h>
+#include <vector>
 
 enum ControlType {
     HEATING, COOLING
@@ -32,8 +31,8 @@ private:
     int sensorPin;
     int referenceV;
     int controlPin;
-    int startTemp;
-    int stopTemp;
+    float startTemp;
+    float stopTemp;
     bool useAverageValueSystem;
     bool averageValueCount;
     std::vector<float> avsValues;
