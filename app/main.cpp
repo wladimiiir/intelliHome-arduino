@@ -24,7 +24,7 @@ void setupThermostats() {
     thermostats.push_back(createThermostat(A0, 10, 55, 40, COOLING));
     //podlahovka
     //TODO: add function to control if there is need to cool
-    thermostats.push_back(createThermostat(A1, 11, 45, 35, COOLING));
+    thermostats.push_back(createThermostat(A1, 11, 25, 20, COOLING));
     threeWayValveControllerThermostat = thermostats.end();
 }
 

@@ -10,6 +10,8 @@ higherRelayPin(higherRelayPin),
 fromTemperature(40),
 toTemperature(45),
 lastRelayRunTime(0){
+    pinMode(lowerRelayPin, OUTPUT);
+    pinMode(higherRelayPin, OUTPUT);
     digitalWrite(lowerRelayPin, LOW);
     digitalWrite(higherRelayPin, LOW);
 }
