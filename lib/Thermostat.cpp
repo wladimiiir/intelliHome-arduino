@@ -9,7 +9,7 @@ sensorPin(sensorPin),
 controlPin(-1),
 startTemp(25),
 stopTemp(30),
-useAverageValueSystem(true),
+useAverageValueSystem(false),
 averageValueCount(5),
 controlType(HEATING),
 lastProcessTime(0) {
@@ -21,6 +21,7 @@ lastProcessTime(0) {
 }
 
 float Thermostat::getCurrentTemperature() {
+    analogReference(referenceV);
     //read one value for "reseting" arduino input pin
     analogRead(sensorPin);
     delay(20);
@@ -32,6 +33,7 @@ float Thermostat::getCurrentTemperature() {
         delay(20);
     }
     value /= READ_COUNT;
+    value = value / (10 / ((referenceV / 1024) * 1000)); //10mV per C / referenceV/1024
 
     return value;
 }
@@ -65,8 +67,6 @@ void Thermostat::process() {
 
     if (useAverageValueSystem)
         temperature = applyAVS(temperature);
-
-    lastProcessTime = millis();
 
     bool changed = changeState(temperature);
     if (changed) {
@@ -102,6 +102,7 @@ float Thermostat::applyAVS(float temperature) {
     if (time - lastProcessTime > AVS_TIME_LIMIT * 1000)
         return temperature;
 
+    lastProcessTime = millis();
     //removing the last one
     if (!avsValues.empty())
         avsValues.pop_back();

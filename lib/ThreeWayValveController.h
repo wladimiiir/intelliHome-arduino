@@ -19,7 +19,7 @@ public:
     void setToTemperature(float temp);
     void process();
 private:
-    Thermostat thermometer;
+    Thermostat* thermometer;
     int lowerRelayPin;
     int higherRelayPin;
     float fromTemperature;

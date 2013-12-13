@@ -1,10 +1,10 @@
 #include "ThreeWayValveController.h"
 
-#define REST_TIME               (30000l)   //ms
+#define REST_TIME               (10000l)   //ms
 #define RELAY_RUN_TIME          (1000l) //ms
 
 ThreeWayValveController::ThreeWayValveController(Thermostat thermometer, int lowerRelayPin, int higherRelayPin) :
-thermometer(thermometer),
+thermometer(&thermometer),
 lowerRelayPin(lowerRelayPin),
 higherRelayPin(higherRelayPin),
 fromTemperature(40),
@@ -29,7 +29,7 @@ void ThreeWayValveController::runRelay(int relayPin) {
 }
 
 void ThreeWayValveController::process() {
-    float currentTemp = thermometer.getCurrentTemperature();
+    float currentTemp = thermometer->getCurrentTemperature();
     
     if(currentTemp < fromTemperature) {
         runRelay(higherRelayPin);
