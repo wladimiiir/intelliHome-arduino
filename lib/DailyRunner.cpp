@@ -12,14 +12,47 @@ toSecond(toSecond) {
 }
 
 bool RunTime::isRunning() {
-    return hour() > fromHour && hour() < toHour
-            && minute() > fromMinute && minute() < toMinute
-            && second() > fromSecond && second() <toSecond;
+    if (hour() < fromHour)
+        return false;
+    if (hour() > toHour)
+        return false;
+
+    if (hour() == fromHour) {
+        if (minute() < fromMinute)
+            return false;
+        if (minute() == fromMinute) {
+            if (second() < fromSecond)
+                return false;
+        }
+    }
+    if (hour() == toHour) {
+        if (minute() > toMinute)
+            return false;
+        if (minute() == toMinute) {
+            if (second() >= toSecond)
+                return false;
+        }
+    }
+    
+//    Serial.print("Running for: ");
+//    Serial.print(fromHour);
+//    Serial.print(":");
+//    Serial.print(fromMinute);
+//    Serial.print(":");
+//    Serial.print(fromSecond);
+//    Serial.print(" - ");
+//    Serial.print(toHour);
+//    Serial.print(":");
+//    Serial.print(toMinute);
+//    Serial.print(":");
+//    Serial.println(toSecond);
+
+    return true;
 }
 
 DailyRunner::DailyRunner(int controlPin) : controlPin(controlPin) {
+    digitalWrite(controlPin, HIGH);
     pinMode(controlPin, OUTPUT);
-    digitalWrite(controlPin, LOW);
 }
 
 void DailyRunner::addRunTime(int fromHour, int fromMinute, int fromSecond, int toHour, int toMinute, int toSecond) {
@@ -40,5 +73,5 @@ bool DailyRunner::isRunning() {
 }
 
 void DailyRunner::process() {
-    digitalWrite(controlPin, isRunning() ? HIGH : LOW);
+    digitalWrite(controlPin, isRunning() ? LOW : HIGH);
 }

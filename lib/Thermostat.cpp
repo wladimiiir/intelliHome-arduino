@@ -13,28 +13,27 @@ useAverageValueSystem(false),
 averageValueCount(5),
 controlType(HEATING),
 lastProcessTime(0) {
-#ifdef INTERNAL1V1
     referenceV = INTERNAL1V1;
-#else
-    referenceV = DEFAULT;
-#endif
+    this->sensorPin = sensorPin;
+    pinMode(sensorPin, INPUT);
+    Serial.println(sensorPin);
 }
 
 float Thermostat::getCurrentTemperature() {
-    analogReference(referenceV);
+    analogReference(INTERNAL1V1);
     //read one value for "reseting" arduino input pin
     analogRead(sensorPin);
-    delay(20);
+    delay(100);
 
     //read x times and make average
-    float value = 0;
+    float value = 0.0;
     for (int i = 0; i < READ_COUNT; i++) {
         value += analogRead(sensorPin);
         delay(20);
     }
-    value /= READ_COUNT;
-    value = value / (10 / ((referenceV / 1024) * 1000)); //10mV per C / referenceV/1024
-
+    value /= (float)READ_COUNT;
+    value = value / 9.309091;//(10.0 / ((referenceV / 1024.0) * 1000.0)); //10mV per C / referenceV/1024
+    
     return value;
 }
 

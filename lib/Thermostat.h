@@ -29,7 +29,7 @@ public:
 private:
     State state;
     int sensorPin;
-    int referenceV;
+    float referenceV;
     int controlPin;
     float startTemp;
     float stopTemp;

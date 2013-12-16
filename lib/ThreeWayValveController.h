@@ -14,9 +14,10 @@
 
 class ThreeWayValveController {
 public:
-    ThreeWayValveController(Thermostat thermometer, int lowerRelayPin, int higherRelayPin);
+    ThreeWayValveController(Thermostat* thermometer, int lowerRelayPin, int higherRelayPin);
     void setFromTemperature(float temp);
     void setToTemperature(float temp);
+    void reset(unsigned long cycleSeconds);
     void process();
 private:
     Thermostat* thermometer;
@@ -26,8 +27,9 @@ private:
     float toTemperature;
     //
     long lastRelayRunTime;
+    int currentPosition;
     
-    void runRelay(int relayPin);
+    bool runRelay(int relayPin);
 };
 
 #endif	/* THREEWAYVALVECONTROL_H */
