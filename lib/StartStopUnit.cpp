@@ -53,7 +53,7 @@ void StartStopUnit::process(float state) {
         start();
         unit->process(state);
         stopped = false;
-    } else {
+    } else if (!stopped) {
         unit->process(state);
     }
 }

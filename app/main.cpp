@@ -14,11 +14,10 @@
 #include "../lib/StartStopUnit.h"
 #include "../lib/ElectricHeaterUnit.h"
 
-#define FLOOR_HEATING_SENSOR_PIN        A0
-#define TANK_1_SENSOR_PIN               A1
-#define TANK_2_SENSOR_PIN               A2
-#define TANK_3_SENSOR_PIN               A3 //floor heating sensor
-#define BEDROOM_SENSOR_PIN              A4
+#define FLOOR_HEATING_SENSOR_PIN                A0
+#define TANK_MID_LEVEL_SENSOR_PIN               A1
+#define TANK_FLOOR_HEATING_OUT_SENSOR_PIN       A2
+#define BEDROOM_SENSOR_PIN                      A4
 
 #define ELECTRIC_HEATER_RELAY_PIN       31
 #define FH_PUMP_RELAY_PIN               30
@@ -27,13 +26,13 @@
 
 LM35Converter lm35Converter;
 
-//Thermometer tank1Thermometer(TANK_1_SENSOR_PIN, &lm35Converter);
-Thermometer tank2Thermometer(TANK_1_SENSOR_PIN, &lm35Converter);
+Thermometer tankFloorHeatingOutThermometer(TANK_FLOOR_HEATING_OUT_SENSOR_PIN, &lm35Converter);
+Thermometer tankMidLevelThermometer(TANK_MID_LEVEL_SENSOR_PIN, &lm35Converter);
 
 DailyRunStrategy electricHeaterRunner;
 RelayUnit electricHeaterRelay(ELECTRIC_HEATER_RELAY_PIN);
 RunnerUnit electricHeaterUnit(&electricHeaterRunner, &electricHeaterRelay);
-ElectricHeaterUnit electricHeater(&tank2Thermometer, &electricHeaterRelay, 30.0);
+ElectricHeaterUnit electricHeater(&tankFloorHeatingOutThermometer, &electricHeaterRelay, 24.0);
 
 Thermometer floorHeatingThermometer(FLOOR_HEATING_SENSOR_PIN, &lm35Converter);
 Thermometer bedroomRoomThermometer(BEDROOM_SENSOR_PIN, &lm35Converter);
@@ -43,7 +42,7 @@ DailyTemperatureDefinitionSource roomTemperatureDefinitionSource;
 FloorHeatingUnit floorHeatingUnit(
         new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(25, 35)),
         new RelayUnit(FH_PUMP_RELAY_PIN),
-        new ElectricHeaterUnit(&tank2Thermometer, &electricHeaterRelay, 24.0)
+        &electricHeater
         );
 DailyRunStrategy floorHeatingIdleRunner;
 RunnerUnit floorHeatingIdleUnit(&floorHeatingIdleRunner, &floorHeatingUnit);
@@ -56,19 +55,9 @@ TemperatureController roomTempController(
 
 extern HardwareSerial Serial;
 
-void setupThermostat(Thermostat* thermostat, int controlPin, float startTemp, float stopTemp, ControlType controlType) {
-    thermostat->setControlPin(controlPin);
-    thermostat->setStartTemperature(startTemp);
-    thermostat->setStopTemperature(stopTemp);
-    thermostat->setControlType(controlType);
-}
-
 void setupThreeWayValveController(ThreeWayValveController* controller, float fromTemp, float toTemp) {
     controller->setFromTemperature(fromTemp);
     controller->setToTemperature(toTemp);
-}
-
-void setupThermostats() {
 }
 
 void setupThreeWayValveControllers() {
@@ -119,8 +108,10 @@ void printDebugInfo() {
 
     Serial.println();
 
-    Serial.print("Tank 2 temperature: ");
-    printTemperature(tank2Thermometer.getTemperature());
+    Serial.print("Tank mid level temperature: ");
+    printTemperature(tankMidLevelThermometer.getTemperature());
+    Serial.print("Tank floor heating out temperature: ");
+    printTemperature(tankFloorHeatingOutThermometer.getTemperature());
     Serial.print("Floor heating temperature: ");
     printTemperature(floorHeatingThermometer.getTemperature());
     Serial.print("Bedroom temperature: ");
@@ -132,15 +123,11 @@ void printDebugInfo() {
 void setup() {
     Serial.begin(9600);
     analogReference(INTERNAL1V1);
-    setupThermostats();
     setupThreeWayValveControllers();
     setupRunTimeSources();
     setupTemperatureDefinitionSources();
-    setTime(12, 24, 00, 6, 1, 2014);
+    setTime(17, 17, 00, 6, 1, 2014);
     //    floorHeatingController.reset(150);
-    
-    pinMode(13, OUTPUT);
-    digitalWrite(13, LOW);
 }
 
 void processModeA() {
@@ -164,5 +151,4 @@ void loop() {
     printDebugInfo();
     processModeB();
     delay(500);
-    
 }

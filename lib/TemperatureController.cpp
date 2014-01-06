@@ -18,12 +18,12 @@ std::vector<float> averageValues;
 TemperatureController::TemperatureController(
         Thermometer* thermometer,
         TemperatureDefinitionSource* temperatureDefinitionSource,
-        StateUnit* controlUnit,
+        StateUnit* heatingUnit,
         StateUnit* idleControlUnit
         ) :
 thermometer(thermometer),
 temperatureDefinitionSource(temperatureDefinitionSource),
-controlUnit(controlUnit),
+heatingUnit(heatingUnit),
 idleControlUnit(idleControlUnit),
 running(false) {
     nextProcessTime = millis();
@@ -53,27 +53,27 @@ void TemperatureController::process() {
 
     temperature = readAverageValue();
     if (temperature > temperatureDefinitionSource->getMaxTemperature() && running) {
-        stopControlUnit();
+        stopHeatingUnit();
         startIdleControlUnit();
     } else if (temperature < temperatureDefinitionSource->getMinTemperature() && !running) {
         stopIdleControlUnit();
-        startControlUnit();
+        startHeatingUnit();
     } else if (running) {
-        processControlUnit(temperature);
+        processHeatingUnit(temperature);
     } else {
         processIdleControlUnit(temperature);
     }
     nextProcessTime = millis() + PROCESS_INTERVAL;
 }
 
-void TemperatureController::startControlUnit() {
+void TemperatureController::startHeatingUnit() {
     running = true;
-    controlUnit->start();
+    heatingUnit->start();
 }
 
-void TemperatureController::stopControlUnit() {
+void TemperatureController::stopHeatingUnit() {
     running = false;
-    controlUnit->stop();
+    heatingUnit->stop();
 }
 
 float calculateState(float lowTemperature, float highTemperature, float temperature) {
@@ -82,8 +82,15 @@ float calculateState(float lowTemperature, float highTemperature, float temperat
     return state;
 }
 
-void TemperatureController::processControlUnit(float temperature) {
-    controlUnit->process(calculateState(temperatureDefinitionSource->getMinTemperature(), temperatureDefinitionSource->getMaxTemperature(), temperature));
+void TemperatureController::processHeatingUnit(float temperature) {
+    float minTemperature;
+    if (idleControlUnit != NULL) {
+        minTemperature = (temperatureDefinitionSource->getMinTemperature() + temperatureDefinitionSource->getMaxTemperature()) / 2;
+    } else {
+        minTemperature = temperatureDefinitionSource->getMinTemperature();
+    }
+
+    heatingUnit->process(calculateState(minTemperature, temperatureDefinitionSource->getMaxTemperature(), temperature));
 }
 
 void TemperatureController::startIdleControlUnit() {

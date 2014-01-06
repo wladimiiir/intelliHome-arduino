@@ -15,17 +15,17 @@
 
 class TemperatureController {
 public:
-    TemperatureController(Thermometer* thermometer, TemperatureDefinitionSource* temperatureDefinitionSource, StateUnit* controlUnit, StateUnit* idleControlUnit);
+    TemperatureController(Thermometer* thermometer, TemperatureDefinitionSource* temperatureDefinitionSource, StateUnit* heatingUnit, StateUnit* idleControlUnit);
     void process();
 private:
     Thermometer* thermometer;
     TemperatureDefinitionSource* temperatureDefinitionSource;
-    StateUnit* controlUnit;
+    StateUnit* heatingUnit;
     StateUnit* idleControlUnit;
     bool running;
-    void startControlUnit();
-    void stopControlUnit();
-    void processControlUnit(float temperature);
+    void startHeatingUnit();
+    void stopHeatingUnit();
+    void processHeatingUnit(float temperature);
     void startIdleControlUnit();
     void stopIdleControlUnit();
     void processIdleControlUnit(float temperature);

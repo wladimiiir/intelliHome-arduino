@@ -15,5 +15,6 @@ float LM35Converter::getAnalogReference() {
 }
 
 float LM35Converter::convertValue(float analogValue) {
-    return analogValue / 9.309091; //(10.0 / ((referenceV / 1024.0) * 1000.0)); //10mV per C / referenceV/1024
+    //return analogValue / 9.309091; //(10.0 / ((referenceV / 1024.0) * 1000.0)); //10mV per C / referenceV/1024
+    return analogValue / (10.0 / (1.1 * 1000 / 1024.0)); //10mV per C / referenceV/1024
 }
