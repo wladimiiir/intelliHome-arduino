@@ -10,23 +10,25 @@
 
 #include <Arduino.h>
 
-#include "Thermostat.h"
+#include "Thermometer.h"
 
 class ThreeWayValveController {
 public:
-    ThreeWayValveController(Thermostat* thermometer, int lowerRelayPin, int higherRelayPin);
+    ThreeWayValveController(Thermometer* thermometer, int lowerRelayPin, int higherRelayPin);
+    float getFromTemperature();
+    float getToTemperature();
     void setFromTemperature(float temp);
     void setToTemperature(float temp);
     void reset(unsigned long cycleSeconds);
     void process();
 private:
-    Thermostat* thermometer;
+    Thermometer* thermometer;
     int lowerRelayPin;
     int higherRelayPin;
     float fromTemperature;
     float toTemperature;
     //
-    long lastRelayRunTime;
+    unsigned long lastRelayRunTime;
     int currentPosition;
     
     bool runRelay(int relayPin);

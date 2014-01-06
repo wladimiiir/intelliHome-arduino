@@ -1,27 +1,25 @@
-#include "WeeklyRunner.h"
+#include "WeeklyRunStrategy.h"
 
-WeeklyRunner::WeeklyRunner(int controlPin) {
-    dailyRunners[MONDAY] = DailyRunner(controlPin);
-    dailyRunners[TUESDAY] = DailyRunner(controlPin);
-    dailyRunners[WEDNESDAY] = DailyRunner(controlPin);
-    dailyRunners[THURSDAY] = DailyRunner(controlPin);
-    dailyRunners[FRIDAY] = DailyRunner(controlPin);
-    dailyRunners[SATURDAY] = DailyRunner(controlPin);
-    dailyRunners[SUNDAY] = DailyRunner(controlPin);
+int controlPin;
+
+WeeklyRunStrategy::WeeklyRunStrategy() {
+    dailyStrategies[MONDAY] = DailyRunStrategy();
+    dailyStrategies[TUESDAY] = DailyRunStrategy();
+    dailyStrategies[WEDNESDAY] = DailyRunStrategy();
+    dailyStrategies[THURSDAY] = DailyRunStrategy();
+    dailyStrategies[FRIDAY] = DailyRunStrategy();
+    dailyStrategies[SATURDAY] = DailyRunStrategy();
+    dailyStrategies[SUNDAY] = DailyRunStrategy();
 }
 
-void WeeklyRunner::addRunTime(Day day, int fromHour, int fromMinute, int fromSecond, int toHour, int toMinute, int toSecond) {
-    dailyRunners[day].addRunTime(fromHour, fromMinute, fromSecond, toHour, toMinute, toSecond);
+void WeeklyRunStrategy::addRunTime(Day day, int fromHour, int fromMinute, int fromSecond, int toHour, int toMinute, int toSecond) {
+    dailyStrategies[day].addRunTime(fromHour, fromMinute, fromSecond, toHour, toMinute, toSecond);
 }
 
-void WeeklyRunner::cloneRunTimes(Day fromDay, Day toDay) {
-    dailyRunners[toDay] = dailyRunners[fromDay];
+void WeeklyRunStrategy::cloneRunTimes(Day fromDay, Day toDay) {
+    dailyStrategies[toDay] = dailyStrategies[fromDay];
 }
 
-bool WeeklyRunner::isRunning() {
-    return dailyRunners[weekday()].isRunning();
-}
-
-void WeeklyRunner::process() {
-    dailyRunners[weekday()].process();
+bool WeeklyRunStrategy::isRunning() {
+    return dailyStrategies[weekday()].isRunning();
 }

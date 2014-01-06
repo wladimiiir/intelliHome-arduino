@@ -1,6 +1,4 @@
-#include <Arduino.h>
-
-#include "DailyRunner.h"
+#include "DailyRunStrategy.h"
 
 RunTime::RunTime(int fromHour, int fromMinute, int fromSecond, int toHour, int toMinute, int toSecond) :
 fromHour(fromHour),
@@ -33,45 +31,39 @@ bool RunTime::isRunning() {
                 return false;
         }
     }
-    
-//    Serial.print("Running for: ");
-//    Serial.print(fromHour);
-//    Serial.print(":");
-//    Serial.print(fromMinute);
-//    Serial.print(":");
-//    Serial.print(fromSecond);
-//    Serial.print(" - ");
-//    Serial.print(toHour);
-//    Serial.print(":");
-//    Serial.print(toMinute);
-//    Serial.print(":");
-//    Serial.println(toSecond);
+
+    //    Serial.print("Running for: ");
+    //    Serial.print(fromHour);
+    //    Serial.print(":");
+    //    Serial.print(fromMinute);
+    //    Serial.print(":");
+    //    Serial.print(fromSecond);
+    //    Serial.print(" - ");
+    //    Serial.print(toHour);
+    //    Serial.print(":");
+    //    Serial.print(toMinute);
+    //    Serial.print(":");
+    //    Serial.println(toSecond);
 
     return true;
 }
 
-DailyRunner::DailyRunner(int controlPin) : controlPin(controlPin) {
-    digitalWrite(controlPin, HIGH);
-    pinMode(controlPin, OUTPUT);
+DailyRunStrategy::DailyRunStrategy() {
 }
 
-void DailyRunner::addRunTime(int fromHour, int fromMinute, int fromSecond, int toHour, int toMinute, int toSecond) {
+void DailyRunStrategy::addRunTime(int fromHour, int fromMinute, int fromSecond, int toHour, int toMinute, int toSecond) {
     runTimes.push_back(RunTime(fromHour, fromMinute, fromSecond, toHour, toMinute, toSecond));
 }
 
-void DailyRunner::clearRunTimes() {
+void DailyRunStrategy::clearRunTimes() {
     runTimes.clear();
 }
 
-bool DailyRunner::isRunning() {
+bool DailyRunStrategy::isRunning() {
     for (std::vector<RunTime>::iterator runTime = runTimes.begin(); runTime != runTimes.end(); ++runTime) {
         if (runTime->isRunning()) {
             return true;
         }
     }
     return false;
-}
-
-void DailyRunner::process() {
-    digitalWrite(controlPin, isRunning() ? LOW : HIGH);
 }

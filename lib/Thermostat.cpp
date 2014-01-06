@@ -20,7 +20,7 @@ lastProcessTime(0) {
 }
 
 float Thermostat::getCurrentTemperature() {
-    analogReference(INTERNAL1V1);
+    //analogReference(INTERNAL1V1);
     //read one value for "reseting" arduino input pin
     analogRead(sensorPin);
     delay(100);
@@ -31,9 +31,12 @@ float Thermostat::getCurrentTemperature() {
         value += analogRead(sensorPin);
         delay(20);
     }
-    value /= (float)READ_COUNT;
-    value = value / 9.309091;//(10.0 / ((referenceV / 1024.0) * 1000.0)); //10mV per C / referenceV/1024
-    
+    value /= (float) READ_COUNT;
+    value = value / 9.309091; //(10.0 / ((referenceV / 1024.0) * 1000.0)); //10mV per C / referenceV/1024
+
+    if (useAverageValueSystem)
+        value = applyAVS(value);
+
     return value;
 }
 
@@ -63,9 +66,6 @@ void Thermostat::setControlType(ControlType controlType) {
 
 void Thermostat::process() {
     float temperature = getCurrentTemperature();
-
-    if (useAverageValueSystem)
-        temperature = applyAVS(temperature);
 
     bool changed = changeState(temperature);
     if (changed) {
@@ -109,7 +109,7 @@ float Thermostat::applyAVS(float temperature) {
     avsValues.insert(0, temperature);
 
     temperature = 0;
-    for (int index = 0; index < avsValues.size(); index++) {
+    for (std::vector<float>::size_type index = 0; index < avsValues.size(); index++) {
         temperature += avsValues.at(index);
     }
     temperature /= avsValues.size();

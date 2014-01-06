@@ -5,12 +5,15 @@
  * Created on Piatok, 2013, december 13, 8:03
  */
 
-#ifndef TIMERCONTROLLER_H
-#define	TIMERCONTROLLER_H
+#ifndef DAILYRUNSTRATEGY_H
+#define	DAILYRUNSTRATEGY_H
 
+#include <Arduino.h>
 #include <Time.h>
 #include <StandardCplusplus.h>
 #include <vector>
+#include "RunStrategy.h"
+#include "StateUnit.h"
 
 class RunTime {
 public:
@@ -20,19 +23,16 @@ private:
     int fromHour, fromMinute, fromSecond, toHour, toMinute, toSecond;
 };
 
-class DailyRunner {
+class DailyRunStrategy : public RunStrategy {
 public:
-    DailyRunner();
-    DailyRunner(int controlPin);
+    DailyRunStrategy();
     void addRunTime(int fromHour, int fromMinute, int fromSecond, int toHour, int toMinute, int toSecond);
     void clearRunTimes();
     bool isRunning();
-    void process();
 private:
-    int controlPin;
     std::vector<RunTime> runTimes;
 };
 
 
-#endif	/* TIMERCONTROLLER_H */
+#endif	/* DAILYRUNSTRATEGY_H */
 

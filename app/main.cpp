@@ -1,26 +1,58 @@
 #include <Arduino.h>
 #include <Time.h>
+#include "../lib/Thermometer.h"
+#include "../lib/LM35Converter.h"
 #include "../lib/Thermostat.h"
 #include "../lib/ThreeWayValveController.h"
-#include "../lib/DailyRunner.h"
+#include "../lib/DailyRunStrategy.h"
+#include "../lib/DailyTemperatureDefinitionSource.h"
+#include "../lib/SimpleTemperatureDefinitionSource.h"
+#include "../lib/FloorHeatingUnit.h"
+#include "../lib/WaterTemperatureController.h"
+#include "../lib/TemperatureController.h"
+#include "../lib/RunnerUnit.h"
+#include "../lib/StartStopUnit.h"
+#include "../lib/ElectricHeaterUnit.h"
 
 #define FLOOR_HEATING_SENSOR_PIN        A0
 #define TANK_1_SENSOR_PIN               A1
 #define TANK_2_SENSOR_PIN               A2
+#define TANK_3_SENSOR_PIN               A3 //floor heating sensor
+#define BEDROOM_SENSOR_PIN              A4
 
 #define ELECTRIC_HEATER_RELAY_PIN       31
 #define FH_PUMP_RELAY_PIN               30
 #define FH_3VALVE_LOW_RELAY_PIN         50
 #define FH_3VALVE_HIGH_RELAY_PIN        51
 
-//Thermostat tank1Thermostat(TANK_1_SENSOR_PIN);
-Thermostat tank2Thermostat(TANK_2_SENSOR_PIN);
+LM35Converter lm35Converter;
 
-DailyRunner electricHeaterRunner(ELECTRIC_HEATER_RELAY_PIN);
+//Thermometer tank1Thermometer(TANK_1_SENSOR_PIN, &lm35Converter);
+Thermometer tank2Thermometer(TANK_1_SENSOR_PIN, &lm35Converter);
 
-DailyRunner floorHeatingRunner(FH_PUMP_RELAY_PIN);
-Thermostat floorHeatingThermostat(FLOOR_HEATING_SENSOR_PIN);
-ThreeWayValveController floorHeatingController(&floorHeatingThermostat, FH_3VALVE_LOW_RELAY_PIN, FH_3VALVE_HIGH_RELAY_PIN);
+DailyRunStrategy electricHeaterRunner;
+RelayUnit electricHeaterRelay(ELECTRIC_HEATER_RELAY_PIN);
+RunnerUnit electricHeaterUnit(&electricHeaterRunner, &electricHeaterRelay);
+ElectricHeaterUnit electricHeater(&tank2Thermometer, &electricHeaterRelay, 30.0);
+
+Thermometer floorHeatingThermometer(FLOOR_HEATING_SENSOR_PIN, &lm35Converter);
+Thermometer bedroomRoomThermometer(BEDROOM_SENSOR_PIN, &lm35Converter);
+ThreeWayValveController floorHeatingValve(&floorHeatingThermometer, FH_3VALVE_LOW_RELAY_PIN, FH_3VALVE_HIGH_RELAY_PIN);
+
+DailyTemperatureDefinitionSource roomTemperatureDefinitionSource;
+FloorHeatingUnit floorHeatingUnit(
+        new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(25, 35)),
+        new RelayUnit(FH_PUMP_RELAY_PIN),
+        new ElectricHeaterUnit(&tank2Thermometer, &electricHeaterRelay, 24.0)
+        );
+DailyRunStrategy floorHeatingIdleRunner;
+RunnerUnit floorHeatingIdleUnit(&floorHeatingIdleRunner, &floorHeatingUnit);
+TemperatureController roomTempController(
+        &bedroomRoomThermometer,
+        &roomTemperatureDefinitionSource,
+        new StartStopUnit(&floorHeatingUnit, MINUTE(20), MINUTE(10)),
+        &floorHeatingIdleUnit
+        );
 
 extern HardwareSerial Serial;
 
@@ -37,61 +69,100 @@ void setupThreeWayValveController(ThreeWayValveController* controller, float fro
 }
 
 void setupThermostats() {
-//    setupThermostat(&tank2Thermostat, -1, 25, 35, COOLING);
 }
 
 void setupThreeWayValveControllers() {
-    setupThreeWayValveController(&floorHeatingController, 30.0, 31.0);
+    setupThreeWayValveController(&floorHeatingValve, 30.0, 31.0);
 }
 
-void setupDailyControllers() {
-    //weekends
-    electricHeaterRunner.addRunTime(8, 0, 0, 10, 0, 0);
-    electricHeaterRunner.addRunTime(12, 0, 0, 14, 0, 0);
-    electricHeaterRunner.addRunTime(16, 0, 0, 18, 0, 0);
-    electricHeaterRunner.addRunTime(20, 0, 0, 22, 0, 0);
-    
-    for (int hour = 0; hour <= 6; hour++) {
-        floorHeatingRunner.addRunTime(hour, 0, 0, hour, 15, 0);
+void setupRunTimeSources() {
+    for (int hour = 0; hour <= 23; hour++) {
+        floorHeatingIdleRunner.addRunTime(hour, 0, 0, hour, 10, 0);
     }
-    for (int hour = 7; hour <= 16; hour++) {
-        floorHeatingRunner.addRunTime(hour, 0, 0, hour, 20, 0);
-    }
-    for (int hour = 17; hour <= 23; hour++) {
-        floorHeatingRunner.addRunTime(hour, 0, 0, hour, 20, 0);
-        floorHeatingRunner.addRunTime(hour, 40, 0, hour, 59, 0);
-    }
+}
+
+void setupTemperatureDefinitionSources() {
+    roomTemperatureDefinitionSource.add(21, 0, 23, 59, 20.0, 20.5);
+    roomTemperatureDefinitionSource.add(0, 0, 6, 0, 19.0, 19.5);
+    roomTemperatureDefinitionSource.add(6, 0, 22, 0, 21.0, 21.5);
+}
+
+void printDate() {
+    Serial.print("Date: ");
+    Serial.print(day());
+    Serial.print(".");
+    Serial.print(month());
+    Serial.print(".");
+    Serial.println(year());
+}
+
+void printTime() {
+    Serial.print("Time: ");
+    Serial.print(hour());
+    Serial.print(":");
+    Serial.print(minute());
+    Serial.print(":");
+    Serial.println(second());
+}
+
+void printTemperature(float temp) {
+    Serial.print(temp);
+    Serial.print(" ");
+    Serial.print((char) 176);
+    Serial.println("C");
 }
 
 void printDebugInfo() {
     Serial.println("================================================");
-    Serial.print("Date: "); Serial.print(day()); Serial.print("."); Serial.print(month()); Serial.print("."); Serial.println(year());
-    Serial.print("Time: "); Serial.print(hour()); Serial.print(":"); Serial.print(minute()); Serial.print(":"); Serial.println(second());
+    printDate();
+    printTime();
+
     Serial.println();
-    //Serial.print("Tank 2 temperature: "); Serial.print(tank2Thermostat.getCurrentTemperature()); Serial.print(" "); Serial.print((char) 176); Serial.println("C");
-    Serial.print("Floor heating temperature: "); Serial.print(floorHeatingThermostat.getCurrentTemperature()); Serial.print(" "); Serial.print((char) 176); Serial.println("C");
+
+    Serial.print("Tank 2 temperature: ");
+    printTemperature(tank2Thermometer.getTemperature());
+    Serial.print("Floor heating temperature: ");
+    printTemperature(floorHeatingThermometer.getTemperature());
+    Serial.print("Bedroom temperature: ");
+    printTemperature(bedroomRoomThermometer.getTemperature());
+
     Serial.println("================================================");
 }
 
 void setup() {
     Serial.begin(9600);
+    analogReference(INTERNAL1V1);
     setupThermostats();
     setupThreeWayValveControllers();
-    setupDailyControllers();
-    setTime(10, 42, 00, 16, 12, 2013);
-//    floorHeatingController.reset(150);
+    setupRunTimeSources();
+    setupTemperatureDefinitionSources();
+    setTime(12, 24, 00, 6, 1, 2014);
+    //    floorHeatingController.reset(150);
+    
+    pinMode(13, OUTPUT);
+    digitalWrite(13, LOW);
 }
 
-void loop() {
-    printDebugInfo();
-    electricHeaterRunner.process();
+void processModeA() {
+    electricHeaterUnit.process(100);
 
     //tank2Thermostat.process();
-    if (floorHeatingRunner.isRunning()) {
+    if (floorHeatingIdleRunner.isRunning()) {
         digitalWrite(FH_PUMP_RELAY_PIN, LOW);
-        floorHeatingController.process();
+        floorHeatingValve.process();
     } else {
         digitalWrite(FH_PUMP_RELAY_PIN, HIGH);
     }
-    delay(1000);
+}
+
+void processModeB() {
+    roomTempController.process();
+}
+
+void loop() {
+//    Serial.println(analogRead(BEDROOM_SENSOR_PIN));
+    printDebugInfo();
+    processModeB();
+    delay(500);
+    
 }

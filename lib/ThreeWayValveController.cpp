@@ -1,9 +1,9 @@
 #include "ThreeWayValveController.h"
 
-#define REST_TIME               (10000l)   //ms
+#define REST_TIME               (3000l)   //ms
 #define RELAY_RUN_TIME          (2000l) //ms
 
-ThreeWayValveController::ThreeWayValveController(Thermostat* thermometer, int lowerRelayPin, int higherRelayPin) :
+ThreeWayValveController::ThreeWayValveController(Thermometer* thermometer, int lowerRelayPin, int higherRelayPin) :
 thermometer(thermometer),
 lowerRelayPin(lowerRelayPin),
 higherRelayPin(higherRelayPin),
@@ -27,19 +27,19 @@ bool ThreeWayValveController::runRelay(int relayPin) {
     delay(RELAY_RUN_TIME);
     digitalWrite(relayPin, HIGH);
     lastRelayRunTime = millis();
-    
+
     return true;
 }
 
 void ThreeWayValveController::process() {
-    float currentTemp = thermometer->getCurrentTemperature();
+    float currentTemp = thermometer->getTemperature();
 
     if (currentTemp < fromTemperature && currentPosition < 50) {
-        if(runRelay(higherRelayPin))
-                currentPosition++;
+        if (runRelay(higherRelayPin))
+            currentPosition++;
     } else if (currentTemp > toTemperature && currentPosition > -50) {
-        if(runRelay(lowerRelayPin))
-                currentPosition--;
+        if (runRelay(lowerRelayPin))
+            currentPosition--;
     }
 }
 
@@ -52,7 +52,7 @@ void ThreeWayValveController::reset(unsigned long cycleSeconds) {
     digitalWrite(higherRelayPin, LOW);
     delay(cycleSeconds * 1000 / 2);
     digitalWrite(higherRelayPin, HIGH);
-    
+
     currentPosition = 0;
 }
 
@@ -62,4 +62,12 @@ void ThreeWayValveController::setFromTemperature(float temp) {
 
 void ThreeWayValveController::setToTemperature(float temp) {
     toTemperature = temp;
+}
+
+float ThreeWayValveController::getFromTemperature() {
+    return fromTemperature;
+}
+
+float ThreeWayValveController::getToTemperature() {
+    return toTemperature;
 }
