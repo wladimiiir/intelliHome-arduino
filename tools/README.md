@@ -1,0 +1,1 @@
+This folder contains libraries used in the project. They should be extracted to $ARDUINO$/libraries folder.
