@@ -9,15 +9,10 @@
 #define	THERMOMETER_H
 
 #include <Arduino.h>
-#include "ThermometerValueConverter.h"
 
 class Thermometer {
 public:
-    Thermometer(int sensorPin, ThermometerValueConverter* converter);
-    float getTemperature();
-private:
-    int sensorPin;
-    ThermometerValueConverter* converter;
+    virtual float getTemperature() = 0;
 };
 
 #endif	/* THERMOMETER_H */

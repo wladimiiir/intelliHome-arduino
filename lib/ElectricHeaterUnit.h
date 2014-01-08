@@ -29,6 +29,7 @@ private:
 
     unsigned long startedTime;
     unsigned long stoppedTime;
+    bool heating;
     
     bool shouldRun();
 };
