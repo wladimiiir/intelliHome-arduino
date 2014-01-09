@@ -13,19 +13,39 @@
 #include <StandardCplusplus.h>
 #include <vector>
 #include "LCDInfo.h"
+#include "LCDSetting.h"
 
 class LCDDisplay {
 public:
     LCDDisplay(LiquidCrystal* lcd);
     void addLCDInfo(LCDInfo* lcdInfo);
+    void addLCDSetting(LCDSetting* lcdSetting);
+    void switchToIdleMode();
+    void switchToSettingsMode();
+    
+    //settings mode functions
+    void previousSetting();
+    void nextSetting();
+    void showSettingDescription();
+    void showSettingValue();
+    LCDSetting* getCurrentSetting();
+    //
+    
     void refresh();
 private:
     LiquidCrystal* lcd;
     long infoDelay;
     std::vector<LCDInfo*> lcdInfos;
+    std::vector<LCDSetting*> lcdSettings;
     
+    bool settingsMode;
+    bool settingDescription;
     unsigned long nextInfoTime;
     unsigned int currentInfoIndex;
+    unsigned int currentSettingIndex;
+    
+    void refreshIdleMode();
+    void refreshSettingsMode();
 };
 
 #endif	/* LCDDISPLAY_H */
