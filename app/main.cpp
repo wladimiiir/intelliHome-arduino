@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Time.h>
+#include <LiquidCrystal.h>
 #include "../lib/LM35Thermometer.h"
 #include "../lib/D18B20Thermometer.h"
 #include "../lib/Thermostat.h"
@@ -13,6 +14,8 @@
 #include "../lib/RunnerUnit.h"
 #include "../lib/StartStopUnit.h"
 #include "../lib/ElectricHeaterUnit.h"
+#include "../lib/LCDDisplay.h"
+#include "../lib/ThermometerLCDInfo.h"
 
 #define FLOOR_HEATING_SENSOR_PIN                A0
 #define TANK_MID_LEVEL_SENSOR_PIN               A1
@@ -51,6 +54,9 @@ TemperatureController roomTempController(
         new RunnerUnit(&floorHeatingIdleRunner, &floorHeatingUnit)
         );
 
+LiquidCrystal lcd(0, 1, 2, 3, 4, 5);
+LCDDisplay lcdDisplay(&lcd);
+
 extern HardwareSerial Serial;
 
 void setupThreeWayValveController(ThreeWayValveController* controller, float fromTemp, float toTemp) {
@@ -74,6 +80,27 @@ void setupTemperatureDefinitionSources() {
     roomTemperatureDefinitionSource.add(6, 0, 15, 0, 20.0, 20.5);
     roomTemperatureDefinitionSource.add(15, 0, 17, 0, 21.5, 22.0);
     roomTemperatureDefinitionSource.add(17, 0, 21, 0, 21.0, 21.5);
+}
+
+void setupLCDDisplay() {
+    lcd.begin(16, 2);
+    lcd.print("Starting...");
+
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Bedroom:        ", &bedroomRoomThermometer));
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Floor heating:  ", &floorHeatingThermometer));
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Tank FH out:    ", &tankFloorHeatingOutThermometer));
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Tank mid level: ", &tankMidLevelThermometer));
+}
+
+void setup() {
+    Serial.begin(9600);
+    analogReference(INTERNAL1V1);
+    setupThreeWayValveControllers();
+    setupRunTimeSources();
+    setupTemperatureDefinitionSources();
+    setupLCDDisplay();
+    setTime(18, 15, 00, 8, 1, 2014);
+    //    floorHeatingController.reset(150);
 }
 
 void printDate() {
@@ -120,16 +147,6 @@ void printDebugInfo() {
     Serial.println("================================================");
 }
 
-void setup() {
-    Serial.begin(9600);
-    analogReference(INTERNAL1V1);
-    setupThreeWayValveControllers();
-    setupRunTimeSources();
-    setupTemperatureDefinitionSources();
-    setTime(18, 15, 00, 8, 1, 2014);
-    //    floorHeatingController.reset(150);
-}
-
 void processModeA() {
     electricHeaterUnit.process(100);
 
@@ -147,8 +164,8 @@ void processModeB() {
 }
 
 void loop() {
-    //    Serial.println(analogRead(BEDROOM_SENSOR_PIN));
-//        printDebugInfo();
-        processModeB();
-//        delay(500);
+    //    printDebugInfo();
+    processModeB();
+    lcdDisplay.refresh();
+    delay(500);
 }
