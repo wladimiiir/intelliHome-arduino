@@ -39,7 +39,7 @@ bool ElectricHeaterUnit::shouldRun() {
         return false;
     }
 
-    return true;
+    return startedTime != 0;
 }
 
 void ElectricHeaterUnit::start() {
