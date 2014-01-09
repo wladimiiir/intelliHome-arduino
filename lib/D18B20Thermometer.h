@@ -13,6 +13,7 @@
 #include <DallasTemperature.h>
 #include "Thermometer.h"
 
+#define WAIT_TIME       (750l)
 
 class D18B20Thermometer : public Thermometer {
 public:
@@ -20,6 +21,8 @@ public:
     float getTemperature();
 private:
     DallasTemperature* sensor;
+    float currentTemperature;
+    unsigned long nextReadingTime;
 };
 
 #endif	/* D18B20THERMOMETER_H */

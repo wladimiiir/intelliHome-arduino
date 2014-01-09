@@ -13,12 +13,20 @@ D18B20Thermometer::D18B20Thermometer(int sensorPin) {
     DeviceAddress address;
     sensor->getAddress(address, 0);
     sensor->setResolution(address, 12);
-//    sensor->setWaitForConversion(false);
+    sensor->setWaitForConversion(false);
+    nextReadingTime = 0;
 }
 
 float D18B20Thermometer::getTemperature() {
+    if(millis() < nextReadingTime) {
+        return currentTemperature;
+    }
+    
     sensor->requestTemperaturesByIndex(0);
-    return sensor->getTempCByIndex(0);
+    currentTemperature = sensor->getTempCByIndex(0);
+    nextReadingTime = millis() + WAIT_TIME;
+    
+    return currentTemperature;
 }
 
 
