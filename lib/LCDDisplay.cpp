@@ -9,7 +9,7 @@
 
 LCDDisplay::LCDDisplay(LiquidCrystal* lcd) :
 lcd(lcd) {
-    infoDelay = 5000;
+    infoDelay = 3000;
     switchToIdleMode();
 }
 

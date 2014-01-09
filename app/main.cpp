@@ -54,7 +54,7 @@ TemperatureController roomTempController(
         new RunnerUnit(&floorHeatingIdleRunner, &floorHeatingUnit)
         );
 
-LiquidCrystal lcd(0, 1, 2, 3, 4, 5);
+LiquidCrystal lcd(2, 3, 11, 10, 9, 8);
 LCDDisplay lcdDisplay(&lcd);
 
 extern HardwareSerial Serial;
@@ -83,13 +83,18 @@ void setupTemperatureDefinitionSources() {
 }
 
 void setupLCDDisplay() {
+    pinMode(7, OUTPUT);
+    analogWrite(7, 100);
+
+    lcd.clear();
+    lcd.noAutoscroll();
     lcd.begin(16, 2);
     lcd.print("Starting...");
 
-    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Bedroom:        ", &bedroomRoomThermometer));
-    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Floor heating:  ", &floorHeatingThermometer));
-    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Tank FH out:    ", &tankFloorHeatingOutThermometer));
-    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Tank mid level: ", &tankMidLevelThermometer));
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Bedroom         ", &bedroomRoomThermometer));
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Floor heating   ", &floorHeatingThermometer));
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Tank FH out     ", &tankFloorHeatingOutThermometer));
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Tank mid level  ", &tankMidLevelThermometer));
 }
 
 void setup() {
@@ -99,7 +104,7 @@ void setup() {
     setupRunTimeSources();
     setupTemperatureDefinitionSources();
     setupLCDDisplay();
-    setTime(18, 15, 00, 8, 1, 2014);
+    setTime(21, 28, 00, 9, 1, 2014);
     //    floorHeatingController.reset(150);
 }
 
@@ -163,8 +168,14 @@ void processModeB() {
     roomTempController.process();
 }
 
+unsigned long nextLCDRestart = 0;
+
 void loop() {
-    //    printDebugInfo();
+    if (nextLCDRestart < millis()) {
+        lcd.begin(16, 2);
+        nextLCDRestart = millis() + 60 * 1000l;
+    }
+    //        printDebugInfo();
     processModeB();
     lcdDisplay.refresh();
     delay(500);
