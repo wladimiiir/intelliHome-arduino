@@ -50,17 +50,18 @@ void LCDDisplay::refresh() {
 }
 
 void LCDDisplay::refreshIdleMode() {
-    if (millis() < nextInfoTime || lcdInfos.empty()) {
+    if (lcdInfos.empty()) {
         return;
     }
 
     lcdInfos.at(currentInfoIndex)->showInLCD(lcd);
-
-    currentInfoIndex++;
-    if (currentInfoIndex > lcdInfos.size() - 1) {
-        currentInfoIndex = 0;
+    if (millis() > nextInfoTime) {
+        currentInfoIndex++;
+        if (currentInfoIndex > lcdInfos.size() - 1) {
+            currentInfoIndex = 0;
+        }
+        nextInfoTime = millis() + infoDelay;
     }
-    nextInfoTime = millis() + infoDelay;
 }
 
 void LCDDisplay::refreshSettingsMode() {

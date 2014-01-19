@@ -16,6 +16,7 @@
 #include "../lib/ElectricHeaterUnit.h"
 #include "../lib/LCDDisplay.h"
 #include "../lib/ThermometerLCDInfo.h"
+#include "../lib/TimeLCDInfo.h"
 
 #define FLOOR_HEATING_SENSOR_PIN                A0
 #define TANK_MID_LEVEL_SENSOR_PIN               A1
@@ -34,23 +35,24 @@ LM35Thermometer tankMidLevelThermometer(TANK_MID_LEVEL_SENSOR_PIN);
 DailyRunStrategy electricHeaterRunner;
 RelayUnit electricHeaterRelay(ELECTRIC_HEATER_RELAY_PIN);
 RunnerUnit electricHeaterUnit(&electricHeaterRunner, &electricHeaterRelay);
-ElectricHeaterUnit electricHeater(&tankFloorHeatingOutThermometer, &electricHeaterRelay, 24.0);
+ElectricHeaterUnit electricHeater(&tankMidLevelThermometer, &electricHeaterRelay, 34.0);
 
 LM35Thermometer floorHeatingThermometer(FLOOR_HEATING_SENSOR_PIN);
 D18B20Thermometer bedroomRoomThermometer(BEDROOM_SENSOR_PIN);
 ThreeWayValveController floorHeatingValve(&floorHeatingThermometer, FH_3VALVE_LOW_RELAY_PIN, FH_3VALVE_HIGH_RELAY_PIN);
 
-DailyTemperatureDefinitionSource roomTemperatureDefinitionSource;
+DailyTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource;
 FloorHeatingUnit floorHeatingUnit(
-        new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(25, 35)),
+        new WaterTemperatureController(&floorHeatingValve, &floorHeatingTemperatureDefinitionSource),
         new RelayUnit(FH_PUMP_RELAY_PIN),
         &electricHeater
         );
+DailyTemperatureDefinitionSource roomTemperatureDefinitionSource;
 DailyRunStrategy floorHeatingIdleRunner;
 TemperatureController roomTempController(
         &bedroomRoomThermometer,
         &roomTemperatureDefinitionSource,
-        new StartStopUnit(&floorHeatingUnit, MINUTE(20), MINUTE(10)),
+        new StartStopUnit(&floorHeatingUnit, MINUTE(50), MINUTE(10)),
         new RunnerUnit(&floorHeatingIdleRunner, &floorHeatingUnit)
         );
 
@@ -69,17 +71,22 @@ void setupThreeWayValveControllers() {
 }
 
 void setupRunTimeSources() {
-    for (int hour = 0; hour <= 23; hour++) {
+    for (int hour = 4; hour <= 21; hour++) {
         floorHeatingIdleRunner.addRunTime(hour, 0, 0, hour, 10, 0);
     }
 }
 
 void setupTemperatureDefinitionSources() {
-    roomTemperatureDefinitionSource.add(21, 0, 23, 59, 19.5, 20.0);
-    roomTemperatureDefinitionSource.add(0, 0, 6, 0, 19.0, 19.5);
-    roomTemperatureDefinitionSource.add(6, 0, 15, 0, 20.0, 20.5);
-    roomTemperatureDefinitionSource.add(15, 0, 17, 0, 21.5, 22.0);
-    roomTemperatureDefinitionSource.add(17, 0, 21, 0, 21.0, 21.5);
+    roomTemperatureDefinitionSource.add(22, 0, 23, 59, 19.5, 20.0);
+    roomTemperatureDefinitionSource.add(0, 0, 14, 0, 19.5, 20.0);
+    roomTemperatureDefinitionSource.add(14, 0, 15, 0, 20.0, 20.5);
+    roomTemperatureDefinitionSource.add(15, 0, 22, 0, 21.0, 21.5);
+    
+//    roomTemperatureDefinitionSource.add(20, 0, 23, 59, 19.5, 21.0);
+//    roomTemperatureDefinitionSource.add(17, 0, 20, 0, 21.5, 22.0);
+//    roomTemperatureDefinitionSource.add(0, 0, 17, 0, 19.5, 21.0);
+
+    floorHeatingTemperatureDefinitionSource.add(0, 0, 23, 59, 31, 32);
 }
 
 void setupLCDDisplay() {
@@ -91,6 +98,7 @@ void setupLCDDisplay() {
     lcd.begin(16, 2);
     lcd.print("Starting...");
 
+    lcdDisplay.addLCDInfo(new TimeLCDInfo());
     lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Bedroom         ", &bedroomRoomThermometer));
     lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Floor heating   ", &floorHeatingThermometer));
     lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Tank FH out     ", &tankFloorHeatingOutThermometer));
@@ -104,7 +112,7 @@ void setup() {
     setupRunTimeSources();
     setupTemperatureDefinitionSources();
     setupLCDDisplay();
-    setTime(21, 28, 00, 9, 1, 2014);
+    setTime(9, 56, 0, 18, 1, 2014);
     //    floorHeatingController.reset(150);
 }
 
@@ -116,6 +124,7 @@ void printDate() {
     Serial.print(".");
     Serial.println(year());
 }
+
 
 void printTime() {
     Serial.print("Time: ");
@@ -175,8 +184,7 @@ void loop() {
         lcd.begin(16, 2);
         nextLCDRestart = millis() + 60 * 1000l;
     }
-    //        printDebugInfo();
+    printDebugInfo();
     processModeB();
     lcdDisplay.refresh();
-    delay(500);
 }

@@ -46,12 +46,12 @@ float readAverageValue() {
 void TemperatureController::process() {
     float temperature = thermometer->getTemperature();
 
-    writeAverageValue(temperature);
-    if (millis() < nextProcessTime) {
-        return;
-    }
+//    writeAverageValue(temperature);
+    //if (millis() < nextProcessTime) {
+      //  return;
+    //}
 
-    temperature = readAverageValue();
+//    temperature = readAverageValue();
     if (temperature > temperatureDefinitionSource->getMaxTemperature() && running) {
         stopHeatingUnit();
         startIdleControlUnit();

@@ -30,6 +30,8 @@ private:
     //
     unsigned long lastRelayRunTime;
     int currentPosition;
+    unsigned long runningUntil;
+    int runningRelayPin;
     
     bool runRelay(int relayPin);
 };

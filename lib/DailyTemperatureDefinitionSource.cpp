@@ -32,7 +32,9 @@ bool TemperatureDefinition::isInTime() {
     if (hour() == fromHour) {
         if (minute() < fromMinute)
             return false;
-        if (minute() >= toMinute)
+    }
+    if (hour() == toHour) {
+        if (minute() > toMinute)
             return false;
     }
 
@@ -49,10 +51,11 @@ void DailyTemperatureDefinitionSource::add(int fromHour, int fromMinute, int toH
 float DailyTemperatureDefinitionSource::getMinTemperature() {
     for (std::vector<TemperatureDefinition>::iterator definition = definitions.begin(); definition != definitions.end(); ++definition) {
         if (definition->isInTime()) {
+            Serial.println(definition->getMinTemperature());
             return definition->getMinTemperature();
         }
     }
-    
+
     return 0.0;
 }
 
@@ -62,6 +65,6 @@ float DailyTemperatureDefinitionSource::getMaxTemperature() {
             return definition->getMaxTemperature();
         }
     }
-    
+
     return 0.0;
 }
