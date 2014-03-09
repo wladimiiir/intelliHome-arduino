@@ -29,6 +29,7 @@ bool ElectricHeaterUnit::shouldRun() {
     if (startedTime == 0 && millis() - stoppedTime > STOP_TIME) {
         startedTime = millis();
         stoppedTime = 0;
+        heating = false;
         return true;
     }
 
@@ -61,4 +62,8 @@ void ElectricHeaterUnit::process(float state) {
     } else {
         controlRelay->stop();
     }
+}
+
+State ElectricHeaterUnit::getState() {
+    return startedTime == 0 ? STOPPED : STARTED;
 }

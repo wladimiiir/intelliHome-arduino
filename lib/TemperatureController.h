@@ -22,7 +22,7 @@ private:
     TemperatureDefinitionSource* temperatureDefinitionSource;
     StateUnit* heatingUnit;
     StateUnit* idleControlUnit;
-    bool running;
+    bool heating;
     void startHeatingUnit();
     void stopHeatingUnit();
     void processHeatingUnit(float temperature);

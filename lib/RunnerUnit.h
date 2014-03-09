@@ -17,9 +17,11 @@ public:
     void start();
     void stop();
     void process(float state);
+    State getState();
 private:
     RunStrategy* runner;
     StateUnit* runningUnit;
+    bool running;
 };
 
 #endif	/* RUNNERUNIT_H */

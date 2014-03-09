@@ -34,3 +34,7 @@ void FloorHeatingUnit::process(float state) {
     if(listener != NULL)
         listener->process(state);
 }
+
+State FloorHeatingUnit::getState() {
+    return pumpUnit->getState();
+}

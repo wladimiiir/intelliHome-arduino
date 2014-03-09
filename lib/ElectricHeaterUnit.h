@@ -13,7 +13,7 @@
 #include "RelayUnit.h"
 #include "Thermometer.h"
 
-#define RUN_TIME    (1000l * 60)
+#define RUN_TIME    (1000l * 10)
 #define STOP_TIME    (1000l * 60 * 10)
 
 class ElectricHeaterUnit : public StateUnit {
@@ -22,6 +22,7 @@ public:
     void start();
     void stop();
     void process(float state);
+    State getState();
 private:
     Thermometer* tankThermometer;
     RelayUnit* controlRelay;

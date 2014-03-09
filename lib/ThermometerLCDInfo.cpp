@@ -7,16 +7,23 @@
 
 #include "ThermometerLCDInfo.h"
 
+#define SHOW_TIME       (1500l)
+
 ThermometerLCDInfo::ThermometerLCDInfo(String description, Thermometer* thermometer) :
 description(description),
 thermometer(thermometer) {
 }
 
-void ThermometerLCDInfo::showInLCD(LiquidCrystal* lcd) {
+long ThermometerLCDInfo::showInLCD(LiquidCrystal* lcd) {
     lcd->clear();
     lcd->print(description);
     lcd->setCursor(0, 1);
     lcd->print(thermometer->getTemperature());
+    lcd->print(" ");
+    lcd->print((char) 223);
+    lcd->print("C");
+    
+    return SHOW_TIME;
 }
 
 

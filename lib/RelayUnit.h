@@ -17,8 +17,10 @@ public:
     void start();
     void stop();
     void process(float state);
+    State getState();
 private:
     int controlPin;
+    State currentState;
 };
 
 #endif	/* RELAYUNIT_H */

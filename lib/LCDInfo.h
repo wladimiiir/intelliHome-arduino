@@ -13,7 +13,7 @@
 
 class LCDInfo {
 public:
-    virtual void showInLCD(LiquidCrystal* lcd) = 0;
+    virtual long showInLCD(LiquidCrystal* lcd) = 0;
 };
 
 #endif	/* LCDINFO_H */

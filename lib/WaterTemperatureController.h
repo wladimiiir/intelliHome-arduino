@@ -21,6 +21,7 @@ public:
     void start();
     void stop();
     void process(float state);
+    State getState();
 private:
     ThreeWayValveController* threeWayValveController;
     TemperatureDefinitionSource* temperatureDefinitionSource;

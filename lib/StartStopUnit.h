@@ -22,6 +22,7 @@ public:
     void start();
     void stop();
     void process(float state);
+    State getState();
 private:
     StateUnit* unit;
     long maxRunTime;

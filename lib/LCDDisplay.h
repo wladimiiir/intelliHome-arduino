@@ -15,6 +15,8 @@
 #include "LCDInfo.h"
 #include "LCDSetting.h"
 
+#define LCD_REFRESH_INTERVAL    500l;
+
 class LCDDisplay {
 public:
     LCDDisplay(LiquidCrystal* lcd);
@@ -40,7 +42,8 @@ private:
     
     bool settingsMode;
     bool settingDescription;
-    unsigned long nextInfoTime;
+    unsigned long lastInfoStart;
+    unsigned long nextRefreshTime;
     unsigned int currentInfoIndex;
     unsigned int currentSettingIndex;
     

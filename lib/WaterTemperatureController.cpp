@@ -17,6 +17,7 @@ void WaterTemperatureController::start() {
 }
 
 void WaterTemperatureController::stop() {
+    threeWayValveController->stop();
 }
 
 void WaterTemperatureController::process(float state) {
@@ -25,15 +26,12 @@ void WaterTemperatureController::process(float state) {
     float toT = (state / 100.0) * (maxT - minT) + minT;
     float diffT = threeWayValveController->getToTemperature() - threeWayValveController->getFromTemperature();
 
-    Serial.print("Setting temperature (");
-    Serial.print(state);
-    Serial.print(")");
-    Serial.print(": ");
-    Serial.print(toT - diffT);
-    Serial.print("-");
-    Serial.println(toT);
     threeWayValveController->setFromTemperature(toT - diffT);
     threeWayValveController->setToTemperature(toT);
     threeWayValveController->process();
+}
+
+State WaterTemperatureController::getState() {
+    return STARTED;
 }
 

@@ -15,7 +15,7 @@
 class TimeLCDInfo : public LCDInfo {
 public:
     TimeLCDInfo();
-    void showInLCD(LiquidCrystal* lcd);
+    long showInLCD(LiquidCrystal* lcd);
 };
 
 #endif	/* TIMELCDINFO_H */

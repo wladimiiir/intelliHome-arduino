@@ -21,6 +21,7 @@ public:
     void setToTemperature(float temp);
     void reset(unsigned long cycleSeconds);
     void process();
+    void stop();
 private:
     Thermometer* thermometer;
     int lowerRelayPin;
@@ -28,12 +29,12 @@ private:
     float fromTemperature;
     float toTemperature;
     //
-    unsigned long lastRelayRunTime;
+    unsigned long nextRelayRunTime;
     int currentPosition;
     unsigned long runningUntil;
     int runningRelayPin;
     
-    bool runRelay(int relayPin);
+    void runRelay(int relayPin);
 };
 
 #endif	/* THREEWAYVALVECONTROL_H */

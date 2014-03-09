@@ -5,10 +5,10 @@
 # For Arduino Duemilanove you must change the BAUD_RATE to 57600 bps.
 # Based on: http://playground.arduino.cc/Code/Netbeans
 
-COM_PORT = COM4
+COM_PORT = /dev/ttyACM0
 BAUD_RATE = 115200
 ARDUINO_VERSION = 104
-ARDUINO_BASE_DIR = c:/Development/Arduino
+ARDUINO_BASE_DIR = /home/wladimiiir/-development/arduino-1.0.5
 ARDUINO_CORE_DIR = ${ARDUINO_BASE_DIR}/hardware/arduino/cores/arduino
 ARDUINO_LIB_DIR = ${ARDUINO_BASE_DIR}/libraries
 LIB_CORE_DIR = lib/core
@@ -30,7 +30,9 @@ ARDUINO_PINS_DIR = ${ARDUINO_BASE_DIR}/hardware/arduino/variants/mega
 #BAUD_RATE = 57600
 
 # Include the libraries that you want. This are subfolders of "arduino-1.0.4/libraries" folder:
-INCLUDE_LIBS=EEPROM;StandardCplusplus;Time;OneWire;dallas-temperature-control;
+INCLUDE_LIBS=EEPROM;StandardCplusplus-master;Time;OneWire;\
+dallas-temperature-control;LiquidCrystal;SD;SD/utility;\
+Ethernet;Ethernet/utility;SPI;Regexp;WebServer
 #INCLUDE_LIBS=EEPROM;Esplora;Ethernet;Ethernet/utility;Firmata;GSMSHIELD;\
 LiquidCrystal;MemoryFree;RTClib;SD;SD/utility;Servo;SoftwareSerial;SPI;\
 Stepper;WiFi;WiFi/utility;Wire;Wire/utility;\
@@ -38,7 +40,7 @@ Stepper;WiFi;WiFi/utility;Wire;Wire/utility;\
 # Select the Windows or Linux config of AVR_DUDE (upload utility):
 AVR_DUDE_WINDOWS = ${ARDUINO_BASE_DIR}/hardware/tools/avr/bin/avrdude -C ${ARDUINO_BASE_DIR}/hardware/tools/avr/etc/avrdude.conf	
 AVR_DUDE_LINUX = ${ARDUINO_BASE_DIR}/hardware/tools/avrdude -C ${ARDUINO_BASE_DIR}/hardware/tools/avrdude.conf
-AVR_DUDE = ${AVR_DUDE_WINDOWS}
+AVR_DUDE = ${AVR_DUDE_LINUX}
 	
 #
 ############################# END OF USER CHANGES #############################

@@ -9,23 +9,37 @@
 
 RunnerUnit::RunnerUnit(RunStrategy* runner, StateUnit* runningUnit) :
 runner(runner),
-runningUnit(runningUnit) {
+runningUnit(runningUnit),
+running(false) {
 }
 
 void RunnerUnit::start() {
+    if (running)
+        return;
+
     runningUnit->start();
+    running = true;
 }
 
 void RunnerUnit::stop() {
+    if (!running)
+        return;
+
     runningUnit->stop();
+    running = false;
 }
 
 void RunnerUnit::process(float state) {
-    if(runner->isRunning()) {
-        runningUnit->start();
+    if (runner->isRunning()) {
+        start();
         runningUnit->process(state);
     } else {
-        runningUnit->stop();
+        stop();
     }
 }
+
+State RunnerUnit::getState() {
+    return runningUnit->getState();
+}
+
 

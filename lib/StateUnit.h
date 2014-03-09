@@ -10,11 +10,16 @@
 
 #include <Arduino.h>
 
+enum State {
+    STARTED, STOPPED
+};
+
 class StateUnit {
 public:
     virtual void start() = 0;
     virtual void stop() = 0;
     virtual void process(float state) = 0;
+    virtual State getState() = 0; 
 };
 
 #endif	/* STATEUNIT_H */

@@ -10,11 +10,6 @@
 #include <StandardCplusplus.h>
 #include <vector>
 
-#define PROCESS_INTERVAL        5000
-
-unsigned long nextProcessTime = 0;
-std::vector<float> averageValues;
-
 TemperatureController::TemperatureController(
         Thermometer* thermometer,
         TemperatureDefinitionSource* temperatureDefinitionSource,
@@ -25,54 +20,32 @@ thermometer(thermometer),
 temperatureDefinitionSource(temperatureDefinitionSource),
 heatingUnit(heatingUnit),
 idleControlUnit(idleControlUnit),
-running(false) {
-    nextProcessTime = millis();
-}
-
-void writeAverageValue(float temperature) {
-    averageValues.push_back(temperature);
-}
-
-float readAverageValue() {
-    float value = 0;
-    for (std::vector<float>::size_type index = 0; index < averageValues.size(); index++) {
-        value += averageValues.at(index);
-    }
-    value /= averageValues.size();
-    averageValues.clear();
-    return value;
+heating(false) {
 }
 
 void TemperatureController::process() {
     float temperature = thermometer->getTemperature();
 
-//    writeAverageValue(temperature);
-    //if (millis() < nextProcessTime) {
-      //  return;
-    //}
-
-//    temperature = readAverageValue();
-    if (temperature > temperatureDefinitionSource->getMaxTemperature() && running) {
+    if (heating && temperature > temperatureDefinitionSource->getMaxTemperature()) {
         stopHeatingUnit();
         startIdleControlUnit();
-    } else if (temperature < temperatureDefinitionSource->getMinTemperature() && !running) {
+    } else if (!heating && temperature < temperatureDefinitionSource->getMinTemperature()) {
         stopIdleControlUnit();
         startHeatingUnit();
-    } else if (running) {
+    } else if (heating) {
         processHeatingUnit(temperature);
     } else {
         processIdleControlUnit(temperature);
     }
-    nextProcessTime = millis() + PROCESS_INTERVAL;
 }
 
 void TemperatureController::startHeatingUnit() {
-    running = true;
+    heating = true;
     heatingUnit->start();
 }
 
 void TemperatureController::stopHeatingUnit() {
-    running = false;
+    heating = false;
     heatingUnit->stop();
 }
 
@@ -108,5 +81,9 @@ void TemperatureController::stopIdleControlUnit() {
 void TemperatureController::processIdleControlUnit(float temperature) {
     if (idleControlUnit == NULL)
         return;
+//    if (temperature > temperatureDefinitionSource->getMaxTemperature()) {
+//        idleControlUnit->stop();
+//        return;
+//    }
     idleControlUnit->process(calculateState(temperatureDefinitionSource->getMinTemperature(), temperatureDefinitionSource->getMaxTemperature(), temperature));
 }

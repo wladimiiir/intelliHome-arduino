@@ -11,16 +11,27 @@ RelayUnit::RelayUnit(int controlPin) :
 controlPin(controlPin) {
     digitalWrite(controlPin, HIGH);
     pinMode(controlPin, OUTPUT);
+    currentState = STOPPED;
 }
 
 void RelayUnit::start() {
-    digitalWrite(controlPin, LOW);
+    if (currentState == STOPPED) {
+        digitalWrite(controlPin, LOW);
+        currentState = STARTED;
+    }
 }
 
 void RelayUnit::stop() {
-    digitalWrite(controlPin, HIGH);
+    if (currentState == STARTED) {
+        digitalWrite(controlPin, HIGH);
+        currentState = STOPPED;
+    }
 }
 
 void RelayUnit::process(float state) {
     //do nothing
+}
+
+State RelayUnit::getState() {
+    return currentState;
 }

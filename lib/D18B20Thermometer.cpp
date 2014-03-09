@@ -7,26 +7,75 @@
 
 #include "D18B20Thermometer.h"
 
-D18B20Thermometer::D18B20Thermometer(int sensorPin) {
-    sensor = new DallasTemperature(new OneWire(sensorPin));
-    sensor->begin();
-    DeviceAddress address;
-    sensor->getAddress(address, 0);
-    sensor->setResolution(address, 12);
-    sensor->setWaitForConversion(false);
+MultiSensorProvider::MultiSensorProvider(int multiSensorPin) {
+    sensors = new DallasTemperature(new OneWire(multiSensorPin));
+    sensors->begin();
+    sensors->setWaitForConversion(false);
     nextReadingTime = 0;
 }
 
-float D18B20Thermometer::getTemperature() {
-    if(millis() < nextReadingTime) {
-        return currentTemperature;
+void printAddress(DeviceAddress deviceAddress) {
+    for (uint8_t i = 0; i < 8; i++) {
+        // zero pad the address if necessary
+        if(i > 0)
+            Serial.print(", ");
+        Serial.print("0x");
+        if (deviceAddress[i] < 16) Serial.print("0");
+        Serial.print(deviceAddress[i], HEX);
     }
-    
-    sensor->requestTemperaturesByIndex(0);
-    currentTemperature = sensor->getTempCByIndex(0);
-    nextReadingTime = millis() + WAIT_TIME;
-    
-    return currentTemperature;
+    Serial.println();
+}
+
+void MultiSensorProvider::printAddresses() {
+    for (int index = 0; index < sensors->getDeviceCount(); index++) {
+        DeviceAddress address;
+        sensors->getAddress(address, index);
+        printAddress(address);
+    }
+}
+
+DeviceAddress* MultiSensorProvider::getAddress(int index) {
+    DeviceAddress address;
+    sensors->getAddress(address, index);
+    return &address;
+}
+
+void MultiSensorProvider::initSensor(DeviceAddress* address, int resolution) {
+    sensors->setResolution(*address, resolution);
+    temperatures[address] = 0;
+}
+
+float MultiSensorProvider::getTemperature(DeviceAddress* sensorAddress) {
+    if (millis() > nextReadingTime) {
+        readTemperatures();
+        nextReadingTime = millis() + WAIT_TIME;
+    }
+
+    return temperatures[sensorAddress];
+}
+
+void MultiSensorProvider::readTemperatures() {
+    sensors->requestTemperatures();
+    for (std::map<DeviceAddress*, float>::iterator it = temperatures.begin(); it != temperatures.end(); ++it) {
+        DeviceAddress* address = (*it).first;
+        temperatures[address] = sensors->getTempC(*address);
+    }
+}
+
+D18B20Thermometer::D18B20Thermometer(int sensorPin) {
+    provider = new MultiSensorProvider(sensorPin);
+    address = provider->getAddress(0);
+    provider->initSensor(address, 12);
+}
+
+D18B20Thermometer::D18B20Thermometer(MultiSensorProvider* provider, DeviceAddress* address) :
+provider(provider),
+address(address) {
+    provider->initSensor(address, 12);
+}
+
+float D18B20Thermometer::getTemperature() {
+    return provider->getTemperature(address);
 }
 
 

@@ -58,3 +58,7 @@ void StartStopUnit::process(float state) {
     }
 }
 
+State StartStopUnit::getState() {
+    return runningTime != 0 ? STARTED : STOPPED;
+}
+

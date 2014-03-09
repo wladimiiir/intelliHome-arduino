@@ -6,37 +6,19 @@
  */
 
 #include "TimeLCDInfo.h"
+#include "AppHelper.h"
+
+#define SHOW_TIME       (2000l)
 
 TimeLCDInfo::TimeLCDInfo() {
 }
 
-void TimeLCDInfo::showInLCD(LiquidCrystal* lcd) {
+long TimeLCDInfo::showInLCD(LiquidCrystal* lcd) {
     lcd->clear();
 
-    lcd->print(day());
-    lcd->print(".");
-    lcd->print(month());
-    lcd->print(".");
-    lcd->print(year());
-
+    lcd->print(AppHelper::getDateString());
     lcd->setCursor(0, 1);
+    lcd->print(AppHelper::getTimeString());
 
-    int digit = hour();
-    if (digit < 10) {
-        lcd->print("0");
-    }
-    lcd->print(digit);
-    lcd->print(":");
-    digit = minute();
-    if (digit < 10) {
-        lcd->print("0");
-    }
-    lcd->print(digit);
-    lcd->print(":");
-    digit = second();
-    if (digit < 10) {
-        lcd->print("0");
-    }
-    lcd->print(digit);
-
+    return SHOW_TIME;
 }

@@ -9,7 +9,7 @@ lowerRelayPin(lowerRelayPin),
 higherRelayPin(higherRelayPin),
 fromTemperature(40),
 toTemperature(45),
-lastRelayRunTime(0),
+nextRelayRunTime(0),
 currentPosition(0),
 runningUntil(0),
 runningRelayPin(-1) {
@@ -19,17 +19,11 @@ runningRelayPin(-1) {
     pinMode(higherRelayPin, OUTPUT);
 }
 
-bool ThreeWayValveController::runRelay(int relayPin) {
-    if (millis() < (lastRelayRunTime + REST_TIME)) {
-        return false;
-    }
-
+void ThreeWayValveController::runRelay(int relayPin) {
     //run relay for time specified
-    digitalWrite(relayPin, LOW);
     runningRelayPin = relayPin;
     runningUntil = millis() + RELAY_RUN_TIME;
-
-    return true;
+    digitalWrite(relayPin, LOW);
 }
 
 void ThreeWayValveController::process() {
@@ -37,19 +31,29 @@ void ThreeWayValveController::process() {
         if (runningUntil < millis()) {
             digitalWrite(runningRelayPin, HIGH);
             runningRelayPin = -1;
-            lastRelayRunTime = millis();
+            nextRelayRunTime = millis() + REST_TIME;
         }
         return;
     }
+    if (millis() < nextRelayRunTime)
+        return;
 
     float currentTemp = thermometer->getTemperature();
 
     if (currentTemp < fromTemperature && currentPosition < 150) {
-        if (runRelay(higherRelayPin))
-            currentPosition++;
+        runRelay(higherRelayPin);
+        currentPosition++;
     } else if (currentTemp > toTemperature && currentPosition > -150) {
-        if (runRelay(lowerRelayPin))
-            currentPosition--;
+        runRelay(lowerRelayPin);
+        currentPosition--;
+    }
+}
+
+void ThreeWayValveController::stop() {
+    if (runningRelayPin != -1) {
+        digitalWrite(runningRelayPin, HIGH);
+        runningRelayPin = -1;
+        nextRelayRunTime = millis() + REST_TIME;
     }
 }
 

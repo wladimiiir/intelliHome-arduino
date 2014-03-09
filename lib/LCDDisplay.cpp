@@ -9,7 +9,8 @@
 
 LCDDisplay::LCDDisplay(LiquidCrystal* lcd) :
 lcd(lcd) {
-    infoDelay = 3000;
+    infoDelay = 1500;
+    nextRefreshTime = 0;
     switchToIdleMode();
 }
 
@@ -22,7 +23,7 @@ void LCDDisplay::addLCDSetting(LCDSetting* lcdSetting) {
 }
 
 void LCDDisplay::switchToIdleMode() {
-    nextInfoTime = 0;
+    lastInfoStart = 0;
     currentInfoIndex = 0;
     settingsMode = false;
 }
@@ -33,20 +34,25 @@ void LCDDisplay::switchToSettingsMode() {
         lcd->print("No settings");
         lcd->setCursor(0, 1);
         lcd->print("available.");
-        nextInfoTime = millis() + infoDelay;
+        lastInfoStart = 0;
     } else {
-        nextInfoTime = 0;
+        lastInfoStart = 0;
         settingDescription = true;
         settingsMode = true;
     }
 }
 
 void LCDDisplay::refresh() {
+    if (millis() < nextRefreshTime)
+        return;
+
     if (settingsMode) {
         refreshSettingsMode();
     } else {
         refreshIdleMode();
     }
+
+    nextRefreshTime = millis() + LCD_REFRESH_INTERVAL;
 }
 
 void LCDDisplay::refreshIdleMode() {
@@ -54,13 +60,20 @@ void LCDDisplay::refreshIdleMode() {
         return;
     }
 
-    lcdInfos.at(currentInfoIndex)->showInLCD(lcd);
-    if (millis() > nextInfoTime) {
+    unsigned long showTime = lcdInfos.at(currentInfoIndex)->showInLCD(lcd);
+    if (showTime == 0) {
+        return;
+    }
+    if(lastInfoStart == 0) {
+        lastInfoStart = millis();
+    }
+
+    if (millis() > lastInfoStart + showTime) {
         currentInfoIndex++;
         if (currentInfoIndex > lcdInfos.size() - 1) {
             currentInfoIndex = 0;
         }
-        nextInfoTime = millis() + infoDelay;
+        lastInfoStart = 0;
     }
 }
 

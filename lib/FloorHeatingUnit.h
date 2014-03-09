@@ -20,6 +20,7 @@ public:
     void start();
     void stop();
     void process(float state);
+    State getState();
 private:
     WaterTemperatureController* waterTemperatureController;
     RelayUnit* pumpUnit;
