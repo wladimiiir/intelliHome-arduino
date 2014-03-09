@@ -73,12 +73,10 @@ void WebServer::process() {
                     // send web page
                     File webFile = SD.open("web/myhome.htm"); // open web page file
                     if (webFile) {
-                        char buf[256];
+                        byte buf[256];
                         while (webFile.available()) {
                             int read = webFile.read(buf, 256);
-                            for (int index = 0; index < read; index++) {
-                                client.print(buf[index]);
-                            }
+                            client.write(buf, read);
                         }
                         webFile.close();
                     }
@@ -123,7 +121,7 @@ void WebServer::setXMLResponse(EthernetClient client) {
         client.print("<");
         client.print((*it).first);
         client.print(">");
-        client.print((*it).second->getState() == STARTED ? "STARTED" : "STOPPED");
+        client.print((*it).second->getState() == STARTED ? "RUNNING" : "STOPPED");
         client.print("</");
         client.print((*it).first);
         client.print(">");
