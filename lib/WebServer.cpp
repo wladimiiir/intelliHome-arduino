@@ -46,7 +46,7 @@ void WebServer::process() {
             char c = client.read(); // read 1 byte (character) from client
             // buffer first part of HTTP request in HTTP_req array (string)
             // leave last element in array as 0 to null terminate string (REQ_BUF_SZ - 1)
-            if (request.length() < 50) {
+            if (request.length() < 100) {
                 request += c;
             }
             // last line of client request is blank and ends with \n
@@ -58,28 +58,15 @@ void WebServer::process() {
                 // web page or XML page is requested
                 // Ajax request - send XML file
                 if (request.indexOf("arduino_inputs") != -1) {
-                    // send rest of HTTP header
-                    client.println("Content-Type: text/xml; charset=utf-8");
-                    client.println("Connection: keep-alive");
-                    client.println();
                     // send XML file containing input states
-                    setXMLResponse(client);
-                    client.println();
+                    setInputsXML(client);
+                } else if (request.indexOf("GET /stats ") != -1) {
+                    setStatsPage(client);
+                } else if (request.indexOf("downloadFile?") != -1) {
+                    int fileNameStartIndex = request.indexOf("downloadFile?") + 13;
+                    downloadStatsFile(client, request.substring(fileNameStartIndex, request.indexOf(' ', fileNameStartIndex)));
                 } else { // web page request
-                    // send rest of HTTP header
-                    client.println("Content-Type: text/html");
-                    client.println("Connection: keep-alive");
-                    client.println();
-                    // send web page
-                    File webFile = SD.open("web/myhome.htm"); // open web page file
-                    if (webFile) {
-                        byte buf[256];
-                        while (webFile.available()) {
-                            int read = webFile.read(buf, 256);
-                            client.write(buf, read);
-                        }
-                        webFile.close();
-                    }
+                    setMainPage(client);
                 }
                 break;
             }
@@ -98,7 +85,86 @@ void WebServer::process() {
     client.stop(); // close the connection
 }
 
-void WebServer::setXMLResponse(EthernetClient client) {
+void WebServer::setMainPage(EthernetClient client) {
+    client.println("Content-Type: text/html");
+    client.println("Connection: keep-alive");
+    client.println();
+    // send web page
+    File webFile = SD.open("web/myhome.htm"); // open web page file
+    if (webFile) {
+        byte buf[256];
+        while (webFile.available()) {
+            int read = webFile.read(buf, 256);
+            client.write(buf, read);
+        }
+        webFile.close();
+    }
+}
+
+void addFileEntries(EthernetClient client, String dirPrefix, File dir) {
+    File file;
+    while (file = dir.openNextFile()) {
+        if (file.isDirectory()) {
+            addFileEntries(client, dirPrefix + file.name() + "/", file);
+        } else {
+            client.print("<a href=\"downloadFile?");
+            client.print(dirPrefix + file.name());
+            client.print("\">");
+            client.print(dirPrefix + file.name());
+            client.print("</a><br/>");
+        }
+        file.close();
+    }
+}
+
+void WebServer::setStatsPage(EthernetClient client) {
+    client.println("Content-Type: text/html");
+    client.println("Connection: keep-alive");
+    client.println();
+    client.print("<html>");
+    client.print("<head>");
+    client.print("</head>");
+    client.print("<body>");
+    File statsDir = SD.open("stats");
+    if (statsDir && statsDir.isDirectory()) {
+        addFileEntries(client, "", statsDir);
+        statsDir.close();
+    }
+    client.print("</body>");
+    client.print("/<html>");
+}
+
+void WebServer::downloadStatsFile(EthernetClient client, String fileName) {
+    File statsFile = SD.open(String("stats/" + fileName).c_str());
+    if (statsFile) {
+        client.println("Content-Type: text/csv");
+        client.println("Connection: keep-alive");
+        client.println();
+        byte buf[256];
+        while (statsFile.available()) {
+            int read = statsFile.read(buf, 256);
+            client.write(buf, read);
+        }
+        statsFile.close();
+    } else {
+        client.println("Content-Type: text/html");
+        client.println("Connection: keep-alive");
+        client.println();
+        client.print("<html>");
+        client.print("<head>");
+        client.print("</head>");
+        client.print("<body>");
+        client.print("Cannot find file.");
+        client.print("</body>");
+        client.print("</html>");
+    }
+}
+
+void WebServer::setInputsXML(EthernetClient client) {
+    client.println("Content-Type: text/xml; charset=utf-8");
+    client.println("Connection: keep-alive");
+    client.println();
+
     client.print("<?xml version = \"1.0\"?>");
     client.print("<inputs>");
 

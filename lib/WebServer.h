@@ -30,7 +30,10 @@ private:
     std::map<String, StateUnit*> stateUnitReplaceMap;
     
     bool checkAuthentication(EthernetClient client);
-    void setXMLResponse(EthernetClient client);
+    void setMainPage(EthernetClient client);
+    void setStatsPage(EthernetClient client);
+    void downloadStatsFile(EthernetClient client, String filename);
+    void setInputsXML(EthernetClient client);
 };
 
 #endif	/* WEBSERVER_H */
