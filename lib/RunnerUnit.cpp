@@ -39,7 +39,7 @@ void RunnerUnit::process(float state) {
 }
 
 State RunnerUnit::getState() {
-    return runningUnit->getState();
+    return running ? STARTED : STOPPED;
 }
 
 

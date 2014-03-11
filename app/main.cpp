@@ -65,7 +65,7 @@ DailyTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource;
 FloorHeatingUnit floorHeatingUnit(
         new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(30, 34)),
         new RelayUnit(FH_PUMP_RELAY_PIN),
-        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterRelay, 34.0)
+        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterRelay, 34.0, 1000l * 10, 1000l * 60 * 10)
         );
 DailyTemperatureDefinitionSource roomTemperatureDefinitionSource;
 DailyRunStrategy floorHeatingIdleRunner;
@@ -97,7 +97,7 @@ void setupRunTimeSources() {
     for (int hour = 0; hour <= 23; hour++) {
         floorHeatingIdleRunner.addRunTime(hour, 0, 0, hour, 10, 0);
     }
-    electricHeaterRunner.addRunTime(18, 0, 0, 21, 0, 0);
+    electricHeaterRunner.addRunTime(17, 30, 0, 21, 0, 0);
 }
 
 void setupTemperatureDefinitionSources() {
@@ -183,13 +183,13 @@ void setupTime() {
     bool externalSet = false;
     if (externalSet) {
         tmElements_t time;
-        time.Day = 9;
+        time.Day = 11;
         time.Month = 3;
         time.Year = 2014 - 1970;
 
-        time.Hour = 17;
-        time.Minute = 41;
-        time.Second = 0;
+        time.Hour = 7;
+        time.Minute = 23;
+        time.Second = 30;
         RTC.write(time);
     }
     setTime(RTC.get());
@@ -267,11 +267,13 @@ void processModeA() {
 }
 
 void processModeB() {
-//    electricHeaterUnit.process(0);
-//    State state = electricHeaterUnit.getState();
+    electricHeaterUnit.process(100);
+    State state = electricHeaterUnit.getState();
+    Serial.print(state == STARTED);
     roomTempController.process();
-//    if (state == STARTED && electricHeaterRelay.getState() == STOPPED)
-//        electricHeaterRelay.start();
+    if (state == STARTED && electricHeaterRelay.getState() == STOPPED) {
+        electricHeaterRelay.start();
+    }
 }
 
 unsigned long nextLCDRestart = 0;

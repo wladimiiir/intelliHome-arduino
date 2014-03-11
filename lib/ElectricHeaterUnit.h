@@ -10,7 +10,6 @@
 
 #include <Arduino.h>
 #include "StateUnit.h"
-#include "RelayUnit.h"
 #include "Thermometer.h"
 
 #define RUN_TIME    (1000l * 10)
@@ -18,15 +17,18 @@
 
 class ElectricHeaterUnit : public StateUnit {
 public:
-    ElectricHeaterUnit(Thermometer* tankThermometer, RelayUnit* controlRelay, float temperature);
+    ElectricHeaterUnit(Thermometer* tankThermometer, StateUnit* controlRelay, float temperature, unsigned long runTime = 0, unsigned long stopTime = 0);
     void start();
     void stop();
     void process(float state);
     State getState();
 private:
     Thermometer* tankThermometer;
-    RelayUnit* controlRelay;
+    StateUnit* controlUnit;
     float temperature;
+
+    unsigned long runTime;
+    unsigned long stopTime;
 
     unsigned long startedTime;
     unsigned long stoppedTime;

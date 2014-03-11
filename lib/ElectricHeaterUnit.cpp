@@ -8,10 +8,12 @@
 #include "ElectricHeaterUnit.h"
 #include "RelayUnit.h"
 
-ElectricHeaterUnit::ElectricHeaterUnit(Thermometer* tankThermometer, RelayUnit* controlRelay, float temperature) :
+ElectricHeaterUnit::ElectricHeaterUnit(Thermometer* tankThermometer, StateUnit* controlUnit, float temperature, unsigned long runTime, unsigned long stopTime) :
 tankThermometer(tankThermometer),
-controlRelay(controlRelay),
-temperature(temperature) {
+controlUnit(controlUnit),
+temperature(temperature),
+runTime(runTime),
+stopTime(stopTime) {
     startedTime = 0;
     stoppedTime = 0;
     heating = false;
@@ -26,14 +28,14 @@ bool ElectricHeaterUnit::shouldRun() {
         return true;
     }
 
-    if (startedTime == 0 && millis() - stoppedTime > STOP_TIME) {
+    if (startedTime == 0 && millis() - stoppedTime >= stopTime) {
         startedTime = millis();
         stoppedTime = 0;
         heating = false;
         return true;
     }
 
-    if (stoppedTime == 0 && millis() - startedTime > RUN_TIME) {
+    if (stoppedTime == 0 && millis() - startedTime >= runTime) {
         startedTime = 0;
         stoppedTime = millis();
         heating = false;
@@ -44,13 +46,13 @@ bool ElectricHeaterUnit::shouldRun() {
 }
 
 void ElectricHeaterUnit::start() {
-    controlRelay->start();
+    controlUnit->start();
     startedTime = millis();
     stoppedTime = 0;
 }
 
 void ElectricHeaterUnit::stop() {
-    controlRelay->stop();
+    controlUnit->stop();
     startedTime = 0;
     stoppedTime = 0;
     heating = false;
@@ -58,9 +60,9 @@ void ElectricHeaterUnit::stop() {
 
 void ElectricHeaterUnit::process(float state) {
     if (shouldRun()) {
-        controlRelay->start();
+        controlUnit->start();
     } else {
-        controlRelay->stop();
+        controlUnit->stop();
     }
 }
 

@@ -26,10 +26,10 @@ heating(false) {
 void TemperatureController::process() {
     float temperature = thermometer->getTemperature();
 
-    if (heating && temperature > temperatureDefinitionSource->getMaxTemperature()) {
+    if (heating && temperature >= temperatureDefinitionSource->getMaxTemperature()) {
         stopHeatingUnit();
         startIdleControlUnit();
-    } else if (!heating && temperature < temperatureDefinitionSource->getMinTemperature()) {
+    } else if (!heating && temperature <= temperatureDefinitionSource->getMinTemperature()) {
         stopIdleControlUnit();
         startHeatingUnit();
     } else if (heating) {
