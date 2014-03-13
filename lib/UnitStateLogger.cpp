@@ -28,8 +28,10 @@ void UnitStateLogger::process() {
         switch((*stateUnit)->getState()) {
             case STARTED:
                 logText += "STARTED;";
+                break;
             case STOPPED:
                 logText += "STOPPED;";
+                break;
         }
     }
     logger->log("StateUnits", logText);

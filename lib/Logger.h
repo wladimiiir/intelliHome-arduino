@@ -10,7 +10,7 @@
 
 class Logger {
 public:
-    virtual void log(String id, String logText);
+    virtual void log(String id, const String logText);
 };
 
 #endif	/* LOGGER_H */

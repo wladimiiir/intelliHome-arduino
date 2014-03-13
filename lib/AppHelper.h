@@ -13,7 +13,7 @@
 class AppHelper {
 public:
 
-    static String getDateString() {
+    static const String getDateString() {
         String date = "";
 
         date += day();
@@ -25,7 +25,7 @@ public:
         return date;
     }
 
-    static String getTimeString() {
+    static const String getTimeString() {
         String time = "";
 
         int digit = hour();
@@ -49,8 +49,16 @@ public:
         return time;
     }
 
-    static String toString(float value) {
-        return String((int) value) + "." + String((int) ((value - ((int) value)) * 100));
+    static const String toString(float value) {
+        String strValue = "";
+        if (value < 0) {
+            strValue += "-";
+            value = -value;
+        }
+        strValue += (int) value;
+        strValue += ".";
+        strValue += (int) ((value - (int) value) * 100);
+        return strValue;
     }
 };
 

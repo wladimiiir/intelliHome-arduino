@@ -17,6 +17,8 @@
 #include "Thermometer.h"
 #include "StateUnit.h"
 
+#define BUFFER_SIZE     32
+
 class WebServer {
 public:
     WebServer(uint16_t port);

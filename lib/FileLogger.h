@@ -16,7 +16,7 @@
 class FileLogger : public Logger {
 public:
     FileLogger(String fileName);
-    void log(String id, String logText);
+    void log(String id, const String logText);
 private:
     String fileName;
 };

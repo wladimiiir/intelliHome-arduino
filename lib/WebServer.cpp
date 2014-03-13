@@ -6,6 +6,7 @@
  */
 
 #include <EthernetClient.h>
+#include <Wire.h>
 
 #include "WebServer.h"
 
@@ -83,6 +84,9 @@ void WebServer::process() {
     } // end while (client.connected())
     delay(1); // give the web browser time to receive the data
     client.stop(); // close the connection
+    while (client.status() != 0) {
+        delay(10);
+    }
 }
 
 void WebServer::setMainPage(EthernetClient client) {
@@ -92,10 +96,11 @@ void WebServer::setMainPage(EthernetClient client) {
     // send web page
     File webFile = SD.open("web/myhome.htm"); // open web page file
     if (webFile) {
-        byte buf[256];
+        byte buf[BUFFER_SIZE];
         while (webFile.available()) {
-            int read = webFile.read(buf, 256);
-            client.write(buf, read);
+            int read = webFile.read(buf, BUFFER_SIZE);
+            if (client.connected())
+                client.write(buf, read);
         }
         webFile.close();
     }
@@ -126,24 +131,30 @@ void WebServer::setStatsPage(EthernetClient client) {
     client.print("</head>");
     client.print("<body>");
     File statsDir = SD.open("stats");
-    if (statsDir && statsDir.isDirectory()) {
-        addFileEntries(client, "", statsDir);
+    if (statsDir) {
+        if (statsDir.isDirectory())
+            addFileEntries(client, "", statsDir);
+
         statsDir.close();
     }
     client.print("</body>");
-    client.print("/<html>");
+    client.print("</html>");
 }
 
 void WebServer::downloadStatsFile(EthernetClient client, String fileName) {
     File statsFile = SD.open(String("stats/" + fileName).c_str());
     if (statsFile) {
         client.println("Content-Type: text/csv");
+        client.print("Content-Disposition: inline; filename=\"");
+        client.print(fileName);
+        client.println("\"");
         client.println("Connection: keep-alive");
         client.println();
-        byte buf[256];
+        byte buf[BUFFER_SIZE];
         while (statsFile.available()) {
-            int read = statsFile.read(buf, 256);
-            client.write(buf, read);
+            int read = statsFile.read(buf, BUFFER_SIZE);
+            if (client.connected())
+                client.write(buf, read);
         }
         statsFile.close();
     } else {
