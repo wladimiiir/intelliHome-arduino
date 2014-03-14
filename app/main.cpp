@@ -11,6 +11,7 @@
 #include "../lib/DailyRunStrategy.h"
 #include "../lib/DailyTemperatureDefinitionSource.h"
 #include "../lib/SimpleTemperatureDefinitionSource.h"
+#include "../lib/ConfigurableTemperatureDefinitionSource.h"
 #include "../lib/FloorHeatingUnit.h"
 #include "../lib/WaterTemperatureController.h"
 #include "../lib/TemperatureController.h"
@@ -25,6 +26,9 @@
 #include "../lib/TemperatureLogger.h"
 #include "../lib/UnitStateLogger.h"
 #include "../lib/WebServer.h"
+#include "../lib/ConfigManager.h"
+#include "../lib/MinTemperatureConfigurator.h"
+#include "../lib/MaxTemperatureConfigurator.h"
 
 #define SD_CS_PIN                        4
 
@@ -38,6 +42,7 @@
 byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
 IPAddress ip(192, 168, 1, 177);
 WebServer server(776);
+ConfigManager configManager;
 
 DeviceAddress bedroomThermometerAddress = {0x28, 0x93, 0xC3, 0x55, 0x05, 0x00, 0x00, 0xF6};
 DeviceAddress outsideThermometerAddress = {0x28, 0x46, 0x45, 0x38, 0x05, 0x00, 0x00, 0x83};
@@ -67,11 +72,12 @@ FloorHeatingUnit floorHeatingUnit(
         new RelayUnit(FH_PUMP_RELAY_PIN),
         new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterRelay, 34.0, 1000l * 10, 1000l * 60 * 10)
         );
-DailyTemperatureDefinitionSource roomTemperatureDefinitionSource;
+DailyTemperatureDefinitionSource automaticBedroomTemperatureDefinitionSource;
+ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(&automaticBedroomTemperatureDefinitionSource);
 DailyRunStrategy floorHeatingIdleRunner;
 TemperatureController roomTempController(
         &bedroomThermometer,
-        &roomTemperatureDefinitionSource,
+        &bedroomTemperatureDefinitionSource,
         new StartStopUnit(&floorHeatingUnit, MINUTE(20), MINUTE(5)),
         new RunnerUnit(&floorHeatingIdleRunner, &floorHeatingUnit)
         );
@@ -106,7 +112,7 @@ void setupTemperatureDefinitionSources() {
     //    roomTemperatureDefinitionSource.add(14, 0, 15, 0, 20.5, 21.0);
     //    roomTemperatureDefinitionSource.add(15, 0, 22, 0, 21.5, 22.0);
 
-    roomTemperatureDefinitionSource.add(0, 0, 23, 59, 20.5, 21.0);
+    automaticBedroomTemperatureDefinitionSource.add(0, 0, 23, 59, 20.5, 21.0);
 
     //    roomTemperatureDefinitionSource.add(20, 0, 23, 59, 19.5, 21.0);
     //    roomTemperatureDefinitionSource.add(17, 0, 20, 0, 21.5, 22.0);
@@ -162,6 +168,8 @@ void setupWebServer() {
     Ethernet.begin(mac, ip);
     server.begin();
 
+    server.setConfigManager(&configManager);
+    
     server.registerThermometerReplace("outside", &outsideThermometer);
     server.registerThermometerReplace("bedroom", &bedroomThermometer);
     server.registerThermometerReplace("tankTop", &tankTopLevelThermometer);
@@ -177,6 +185,11 @@ void setupWebServer() {
     lcd.setCursor(0, 1);
     Ethernet.localIP().printTo(lcd);
     delay(1000);
+}
+
+void setupConfigManager() {
+    configManager.registerConfigurator("bedroomMinTemp", new MinTemperatureConfigurator(&bedroomTemperatureDefinitionSource));
+    configManager.registerConfigurator("bedroomMaxTemp", new MaxTemperatureConfigurator(&bedroomTemperatureDefinitionSource));
 }
 
 void setupTime() {
@@ -206,6 +219,7 @@ void setup() {
     setupLCDDisplay();
     setupLoggers();
     setupSDCard();
+    setupConfigManager();
     setupWebServer();
     //    oneWireSensorProvider.printAddresses();
 }

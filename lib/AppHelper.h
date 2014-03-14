@@ -8,11 +8,11 @@
 #ifndef APPHELPER_H
 #define	APPHELPER_H
 
+#include <Arduino.h>
 #include <Time.h>
 
 class AppHelper {
 public:
-
     static const String getDateString() {
         String date = "";
 
@@ -59,6 +59,22 @@ public:
         strValue += ".";
         strValue += (int) ((value - (int) value) * 100);
         return strValue;
+    }
+
+    static bool checkFloatValue(String value) {
+        bool hasSeparator = false;
+        for (unsigned int index = 0; index < value.length(); index++) {
+            char c = value.charAt(index);
+            if (c == '.') {
+                if (hasSeparator)
+                    return false;
+                else
+                    hasSeparator = true;
+            } else if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return value.length() > 0 && value.charAt(value.length() - 1) != '.';
     }
 };
 
