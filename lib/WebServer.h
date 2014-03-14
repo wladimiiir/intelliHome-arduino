@@ -16,24 +16,29 @@
 #include "AppHelper.h"
 #include "Thermometer.h"
 #include "StateUnit.h"
+#include "ConfigManager.h"
 
 #define BUFFER_SIZE     32
 
 class WebServer {
 public:
     WebServer(uint16_t port);
+    void setConfigManager(ConfigManager* manager);
     void registerThermometerReplace(String pattern, Thermometer* thermometer);
     void registerStateUnitReplace(String pattern, StateUnit* stateUnit);
     void begin();
     void process();
 private:
     EthernetServer* server;
+    ConfigManager* configManager;
     std::map<String, Thermometer*> thermometerReplaceMap;
     std::map<String, StateUnit*> stateUnitReplaceMap;
     
     bool checkAuthentication(EthernetClient client);
     void setMainPage(EthernetClient client);
     void setStatsPage(EthernetClient client);
+    void setConfigPage(EthernetClient client);
+    void setConfigValues(EthernetClient client);
     void downloadStatsFile(EthernetClient client, String filename);
     void setInputsXML(EthernetClient client);
 };

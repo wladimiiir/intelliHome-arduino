@@ -14,6 +14,10 @@ WebServer::WebServer(uint16_t port) {
     this->server = new EthernetServer(port);
 }
 
+void WebServer::setConfigManager(ConfigManager* manager) {
+    this->configManager = manager;
+}
+
 void WebServer::registerThermometerReplace(String pattern, Thermometer* thermometer) {
     thermometerReplaceMap[pattern] = thermometer;
 }
@@ -66,6 +70,10 @@ void WebServer::process() {
                 } else if (request.indexOf("downloadFile?") != -1) {
                     int fileNameStartIndex = request.indexOf("downloadFile?") + 13;
                     downloadStatsFile(client, request.substring(fileNameStartIndex, request.indexOf(' ', fileNameStartIndex)));
+                } else if (request.indexOf("GET /config ") != -1) {
+                    setConfigPage(client);
+                } else if (request.indexOf("arduino_config_values") != -1) {
+                    setConfigValues(client);
                 } else { // web page request
                     setMainPage(client);
                 }
@@ -139,6 +147,56 @@ void WebServer::setStatsPage(EthernetClient client) {
     }
     client.print("</body>");
     client.print("</html>");
+}
+
+void WebServer::setConfigPage(EthernetClient client) {
+    if (configManager == NULL) {
+        client.println("HTTP/1.1 404 Not found");
+        return;
+    }
+
+    client.println("Content-Type: text/html");
+    client.println("Connection: keep-alive");
+    client.println();
+
+    // send web page
+    File webFile = SD.open("web/config.htm"); // open config page file
+    if (webFile) {
+        byte buf[BUFFER_SIZE];
+        while (webFile.available()) {
+            int read = webFile.read(buf, BUFFER_SIZE);
+            if (client.connected())
+                client.write(buf, read);
+        }
+        webFile.close();
+    }
+}
+
+void WebServer::setConfigValues(EthernetClient client) {
+    client.println("Content-Type: text/xml; charset=utf-8");
+    client.println("Connection: keep-alive");
+    client.println();
+
+    client.print("<?xml version = \"1.0\"?>");
+    client.print("<values>");
+
+    if (configManager == NULL) {
+        client.print("</values>");
+        return;
+    }
+
+    std::map<String, Configurator*> configurators = configManager->getConfigurators();
+    for (std::map<String, Configurator*>::iterator it = configurators.begin(); it != configurators.end(); ++it) {
+        client.print("<");
+        client.print((*it).first);
+        client.print(">");
+        client.print((*it).second->getValue());
+        client.print("</");
+        client.print((*it).first);
+        client.print(">");
+    }
+
+    client.print("</values>");
 }
 
 void WebServer::downloadStatsFile(EthernetClient client, String fileName) {
