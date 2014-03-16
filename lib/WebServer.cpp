@@ -74,6 +74,10 @@ void WebServer::process() {
                     setConfigPage(client);
                 } else if (request.indexOf("arduino_config_values") != -1) {
                     setConfigValues(client);
+                } else if (request.indexOf("set_config?") != -1) {
+                    int configStartIndex = request.indexOf("set_config?") + 11;
+                    String keyValue = request.substring(configStartIndex, request.indexOf(' ', configStartIndex));
+                    setConfig(client, keyValue.substring(0, keyValue.indexOf('=')), keyValue.substring(keyValue.indexOf('=') + 1));
                 } else { // web page request
                     setMainPage(client);
                 }
@@ -197,6 +201,12 @@ void WebServer::setConfigValues(EthernetClient client) {
     }
 
     client.print("</values>");
+}
+
+void WebServer::setConfig(EthernetClient client, String key, String value) {
+    if (configManager != NULL) {
+        configManager->setValue(key, value);
+    }
 }
 
 void WebServer::downloadStatsFile(EthernetClient client, String fileName) {

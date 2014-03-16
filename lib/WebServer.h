@@ -39,6 +39,7 @@ private:
     void setStatsPage(EthernetClient client);
     void setConfigPage(EthernetClient client);
     void setConfigValues(EthernetClient client);
+    void setConfig(EthernetClient client, String key, String value);
     void downloadStatsFile(EthernetClient client, String filename);
     void setInputsXML(EthernetClient client);
 };
