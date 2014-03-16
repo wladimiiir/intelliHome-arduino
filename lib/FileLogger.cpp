@@ -13,19 +13,20 @@ FileLogger::FileLogger(String fileName)
 }
 
 void FileLogger::log(String id, const String logText) {
-    char dir[14];
+    char dir[15];
     sprintf(dir, "stats/%02d_%02d_%02d", year() % 100, month(), day());
+    dir[14] = '\0';
     String datedFileName = String(dir) + "/" + fileName;
 
     File dirFile = SD.open(dir);
-    if (!dirFile) {
-        if (SD.mkdir(dir)) {
+    if (dirFile) {
+        dirFile.close();
+    } else {
+        if (!SD.mkdir(dir)) {
             Serial.print("Cannot make directory: ");
             Serial.println(dir);
             return;
         }
-    } else {
-        dirFile.close();
     }
     File file = SD.open(datedFileName.c_str(), FILE_WRITE);
 
@@ -35,7 +36,7 @@ void FileLogger::log(String id, const String logText) {
         delay(5); //give some time to process close
     } else {
         Serial.print("Cannot create file: ");
-        Serial.print(datedFileName);
+        Serial.println(datedFileName);
     }
 }
 
