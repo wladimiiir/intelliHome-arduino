@@ -57,7 +57,11 @@ public:
         }
         strValue += (int) value;
         strValue += ".";
-        strValue += (int) ((value - (int) value) * 100);
+        int afterSeparator = (int) ((value - (int) value) * 100);
+        if(afterSeparator < 10) {
+            strValue += "0";
+        }
+        strValue += afterSeparator;
         return strValue;
     }
 
