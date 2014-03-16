@@ -18,6 +18,10 @@ String MaxTemperatureConfigurator::getValue() {
 }
 
 void MaxTemperatureConfigurator::setValue(String value) {
+    if (value.equalsIgnoreCase("auto")) {
+        temperatureDefinitionSource->setMaxTemperature(AUTO_VALUE);
+        return;
+    }
     if (!AppHelper::checkFloatValue(value))
         return;
 

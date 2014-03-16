@@ -19,6 +19,10 @@ String MinTemperatureConfigurator::getValue() {
 }
 
 void MinTemperatureConfigurator::setValue(String value) {
+    if (value.equalsIgnoreCase("auto")) {
+        temperatureDefinitionSource->setMinTemperature(AUTO_VALUE);
+        return;
+    }
     if (!AppHelper::checkFloatValue(value))
         return;
 
