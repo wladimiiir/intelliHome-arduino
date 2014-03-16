@@ -12,6 +12,7 @@
 #include "../lib/DailyTemperatureDefinitionSource.h"
 #include "../lib/SimpleTemperatureDefinitionSource.h"
 #include "../lib/ConfigurableTemperatureDefinitionSource.h"
+#include "../lib/ConfigurableStateUnit.h"
 #include "../lib/FloorHeatingUnit.h"
 #include "../lib/WaterTemperatureController.h"
 #include "../lib/TemperatureController.h"
@@ -61,8 +62,9 @@ D18B20Thermometer bedroomThermometer(&oneWireSensorProvider, &bedroomThermometer
 
 DailyRunStrategy electricHeaterRunner;
 RelayUnit electricHeaterRelay(ELECTRIC_HEATER_RELAY_PIN);
-ElectricHeaterUnit electricHeater(&tankTopLevelThermometer, &electricHeaterRelay, 44.0);
-RunnerUnit electricHeaterUnit(&electricHeaterRunner, &electricHeater);
+ConfigurableStateUnit electricHeaterUnit(&electricHeaterRelay);
+ElectricHeaterUnit electricHeater(&tankTopLevelThermometer, &electricHeaterUnit, 44.0);
+RunnerUnit electricHeaterRunnerUnit(&electricHeaterRunner, &electricHeater);
 
 ThreeWayValveController floorHeatingValve(&floorHeatingThermometer, FH_3VALVE_LOW_RELAY_PIN, FH_3VALVE_HIGH_RELAY_PIN);
 
@@ -70,7 +72,7 @@ DailyTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource;
 FloorHeatingUnit floorHeatingUnit(
         new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(30, 34)),
         new RelayUnit(FH_PUMP_RELAY_PIN),
-        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterRelay, 34.0, 1000l * 10, 1000l * 60 * 10)
+        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, 34.0, 1000l * 10, 1000l * 60 * 10)
         );
 DailyTemperatureDefinitionSource automaticBedroomTemperatureDefinitionSource;
 ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(&automaticBedroomTemperatureDefinitionSource);
@@ -124,9 +126,6 @@ void setupTemperatureDefinitionSources() {
 }
 
 void setupLCDDisplay() {
-    pinMode(53, OUTPUT);
-    digitalWrite(53, HIGH);
-
     LCDSpecialCharacters::initSpecialCharacters(&lcd);
     lcd.begin(16, 2);
     lcd.write("Starting...");
@@ -150,6 +149,8 @@ void setupLoggers() {
 }
 
 void setupSDCard() {
+    pinMode(53, OUTPUT); //SS pin
+
     if (!SD.begin(SD_CS_PIN)) {
         lcd.clear();
         lcd.write("SD card:");
@@ -161,6 +162,7 @@ void setupSDCard() {
         lcd.setCursor(0, 1);
         lcd.write("READY");
     }
+    
     delay(500);
 }
 
@@ -169,7 +171,7 @@ void setupWebServer() {
     server.begin();
 
     server.setConfigManager(&configManager);
-    
+
     server.registerThermometerReplace("outside", &outsideThermometer);
     server.registerThermometerReplace("bedroom", &bedroomThermometer);
     server.registerThermometerReplace("tankTop", &tankTopLevelThermometer);
@@ -178,7 +180,7 @@ void setupWebServer() {
     server.registerThermometerReplace("floorHeating", &floorHeatingThermometer);
 
     server.registerStateUnitReplace("floorHeatingState", &floorHeatingUnit);
-    server.registerStateUnitReplace("electricHeaterState", &electricHeaterRelay);
+    server.registerStateUnitReplace("electricHeaterState", &electricHeaterUnit);
 
     lcd.clear();
     lcd.write("Server on:");
@@ -190,6 +192,7 @@ void setupWebServer() {
 void setupConfigManager() {
     configManager.registerConfigurator("bedroomMinTemp", new MinTemperatureConfigurator(&bedroomTemperatureDefinitionSource));
     configManager.registerConfigurator("bedroomMaxTemp", new MaxTemperatureConfigurator(&bedroomTemperatureDefinitionSource));
+    configManager.registerConfigurator("electricHeater", &electricHeaterUnit);
 }
 
 void setupTime() {
@@ -269,7 +272,7 @@ void printDebugInfo() {
 }
 
 void processModeA() {
-    electricHeaterUnit.process(100);
+    electricHeaterRunnerUnit.process(100);
 
     //tank2Thermostat.process();
     if (floorHeatingIdleRunner.isRunning()) {
@@ -281,12 +284,11 @@ void processModeA() {
 }
 
 void processModeB() {
-    electricHeaterUnit.process(100);
-    State state = electricHeaterUnit.getState();
-    Serial.print(state == STARTED);
+    electricHeaterRunnerUnit.process(100);
+    State state = electricHeaterRunnerUnit.getState();
     roomTempController.process();
-    if (state == STARTED && electricHeaterRelay.getState() == STOPPED) {
-        electricHeaterRelay.start();
+    if (state == STARTED && electricHeaterUnit.getState() == STOPPED) {
+        electricHeaterUnit.start();
     }
 }
 
@@ -302,6 +304,7 @@ void loop() {
     processModeB();
     lcdDisplay.refresh();
     temperatureLogger.process();
+    unitStateLogger.process();
     server.process();
     delay(500);
 }
