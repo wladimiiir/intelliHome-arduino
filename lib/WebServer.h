@@ -17,8 +17,10 @@
 #include "Thermometer.h"
 #include "StateUnit.h"
 #include "ConfigManager.h"
+#include "FileLogger.h"
 
 #define BUFFER_SIZE     32
+#define DEBUG           true
 
 class WebServer {
 public:
@@ -33,6 +35,7 @@ private:
     ConfigManager* configManager;
     std::map<String, Thermometer*> thermometerReplaceMap;
     std::map<String, StateUnit*> stateUnitReplaceMap;
+    Logger* logger;
     
     bool checkAuthentication(EthernetClient client);
     void setMainPage(EthernetClient client);

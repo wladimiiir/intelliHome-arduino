@@ -19,7 +19,7 @@ public:
     void cloneRunTimes(Day fromDay, Day toDay);
     bool isRunning();
 private:
-    DailyRunStrategy dailyStrategies[7];
+    DailyRunStrategy dailyStrategies[8];
 };
 
 #endif	/* WEEKLYRUNSTRATEGY_H */

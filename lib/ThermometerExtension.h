@@ -12,29 +12,28 @@
 #include "Thermometer.h"
 
 #define TEMPERATURE_CHANGE_TIME (3000l)
-#define NORMALIZATION_TIME      (5000l)
 
-enum TemperatureState {
-    STALLED,
-    FALLEN, 
-    RISEN
+enum Tendency {
+    RESTING,
+    DECREASING, 
+    INCREASING
 };
 
 class ThermometerExtension : public Thermometer {
 public:
     ThermometerExtension(Thermometer* thermometer);
     float getTemperature();
-    TemperatureState getTemperatureState();
+    Tendency getTendency();
 private:
     Thermometer* thermometer;
-    TemperatureState state;
-    TemperatureState stateCandidate;
+    Tendency tendency;
+    Tendency tendencyCandidate;
     float lastTemperature;
     float temperatureCandidate;
     unsigned long lastTemperatureChange;
     
     float normalizeChange(float temperature);
-    void updateState(float oldTemperature, float newTemperature);
+    void updateTendency(float oldTemperature, float newTemperature);
 };
 
 #endif	/* THERMOMETEREXTENSION_H */

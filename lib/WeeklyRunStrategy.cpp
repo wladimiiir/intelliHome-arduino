@@ -3,6 +3,7 @@
 int controlPin;
 
 WeeklyRunStrategy::WeeklyRunStrategy() {
+    dailyStrategies[0] = DailyRunStrategy();
     dailyStrategies[MONDAY] = DailyRunStrategy();
     dailyStrategies[TUESDAY] = DailyRunStrategy();
     dailyStrategies[WEDNESDAY] = DailyRunStrategy();

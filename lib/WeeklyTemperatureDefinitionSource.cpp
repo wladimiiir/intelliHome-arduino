@@ -8,6 +8,7 @@
 #include "WeeklyTemperatureDefinitionSource.h"
 
 WeeklyTemperatureDefinitionSource::WeeklyTemperatureDefinitionSource() {
+    weekDaysSources[0] = DailyTemperatureDefinitionSource();
     weekDaysSources[MONDAY] = DailyTemperatureDefinitionSource();
     weekDaysSources[TUESDAY] = DailyTemperatureDefinitionSource();
     weekDaysSources[WEDNESDAY] = DailyTemperatureDefinitionSource();

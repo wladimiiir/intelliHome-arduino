@@ -19,7 +19,7 @@ public:
     float getMinTemperature();
     float getMaxTemperature();
 private:
-    DailyTemperatureDefinitionSource weekDaysSources[7];
+    DailyTemperatureDefinitionSource weekDaysSources[8];
 };
 
 #endif	/* WEEKLYTEMPERATUREDEFINITIONSOURCE_H */

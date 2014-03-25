@@ -9,11 +9,11 @@
 
 ThermometerExtension::ThermometerExtension(Thermometer* thermometer) :
 thermometer(thermometer),
-state(STALLED) {
+tendency(RESTING) {
     lastTemperature = 0;
     lastTemperatureChange = 0;
     temperatureCandidate = 0;
-    stateCandidate = RISEN;
+    tendencyCandidate = RESTING;
 }
 
 float ThermometerExtension::getTemperature() {
@@ -34,9 +34,8 @@ float ThermometerExtension::normalizeChange(float newTemperature) {
     if (newTemperature != temperatureCandidate) {
         temperatureCandidate = newTemperature;
         lastTemperatureChange = millis();
-        updateState(lastTemperature, newTemperature);
-    }
-    if (millis() > (lastTemperatureChange + TEMPERATURE_CHANGE_TIME)) {
+    } else if (millis() > (lastTemperatureChange + TEMPERATURE_CHANGE_TIME)) {
+        updateTendency(lastTemperature, newTemperature);
         lastTemperature = newTemperature;
         lastTemperatureChange = millis();
     }
@@ -44,33 +43,33 @@ float ThermometerExtension::normalizeChange(float newTemperature) {
     return lastTemperature;
 }
 
-void ThermometerExtension::updateState(float oldTemperature, float newTemperature) {
-    switch (stateCandidate) {
-        case RISEN:
-            if (oldTemperature > newTemperature) {
-                stateCandidate = STALLED;
+void ThermometerExtension::updateTendency(float oldTemperature, float newTemperature) {
+    switch (tendencyCandidate) {
+        case INCREASING:
+            if (newTemperature < oldTemperature) {
+                tendencyCandidate = RESTING;
             } else {
-                state = RISEN;
+                tendency = INCREASING;
             }
             break;
-        case FALLEN:
-            if (oldTemperature < newTemperature) {
-                stateCandidate = STALLED;
+        case DECREASING:
+            if (newTemperature > oldTemperature) {
+                tendencyCandidate = RESTING;
             } else {
-                state = FALLEN;
+                tendency = DECREASING;
             }
             break;
-        case STALLED:
-            if (oldTemperature > newTemperature) {
-                stateCandidate = FALLEN;
+        case RESTING:
+            if (newTemperature < oldTemperature) {
+                tendencyCandidate = DECREASING;
             } else {
-                stateCandidate = RISEN;
+                tendencyCandidate = INCREASING;
             }
-            state = STALLED;
+            tendency = RESTING;
             break;
     }
 }
 
-TemperatureState ThermometerExtension::getTemperatureState() {
-    return state;
+Tendency ThermometerExtension::getTendency() {
+    return tendency;
 }

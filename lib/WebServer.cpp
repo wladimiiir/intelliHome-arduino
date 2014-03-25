@@ -12,6 +12,7 @@
 
 WebServer::WebServer(uint16_t port) {
     this->server = new EthernetServer(port);
+    this->logger = new FileLogger("webserv.txt");
 }
 
 void WebServer::setConfigManager(ConfigManager* manager) {
@@ -44,9 +45,15 @@ void WebServer::process() {
         return;
     }
 
-    boolean currentLineIsBlank = true;
+    bool currentLineIsBlank = true;
+    bool logged = false;
     String request = "";
     while (client.connected()) {
+        if (!logged) {
+            if (DEBUG)
+                logger->log("web", AppHelper::getTimeString() + ": client has connected.");
+            logged = true;
+        }
         if (client.available()) { // client data available to read
             char c = client.read(); // read 1 byte (character) from client
             // buffer first part of HTTP request in HTTP_req array (string)
@@ -59,6 +66,8 @@ void WebServer::process() {
             if (c == '\n' && currentLineIsBlank) {
                 // send a standard http response header
                 client.println("HTTP/1.1 200 OK");
+                if (DEBUG)
+                    logger->log("web", "Got request: " + request);
                 // remainder of header follows below, depending on if
                 // web page or XML page is requested
                 // Ajax request - send XML file
@@ -81,6 +90,10 @@ void WebServer::process() {
                 } else { // web page request
                     setMainPage(client);
                 }
+                //clearing buffer, just in case
+                while (client.available() > 0) {
+                    client.read();
+                }
                 break;
             }
             // every line of text received from the client ends with \r\n
@@ -94,7 +107,9 @@ void WebServer::process() {
             }
         } // end if (client.available())
     } // end while (client.connected())
-    delay(1); // give the web browser time to receive the data
+    delay(10); // give the web browser time to receive the data
+    if (DEBUG)
+        logger->log("web", AppHelper::getTimeString() + ": client has disconnected.");
     client.stop(); // close the connection
     while (client.status() != 0) {
         delay(10);
@@ -209,10 +224,18 @@ void WebServer::setConfig(EthernetClient client, String key, String value) {
     }
 }
 
+String getMimeType(String fileName) {
+    if(fileName.endsWith(".CSV")) {
+        return "text/csv";
+    } else {
+        return "text/plain";
+    }
+}
+
 void WebServer::downloadStatsFile(EthernetClient client, String fileName) {
     File statsFile = SD.open(String("stats/" + fileName).c_str());
     if (statsFile) {
-        client.println("Content-Type: text/csv");
+        client.println("Content-Type: " + getMimeType(fileName));
         client.print("Content-Disposition: inline; filename=\"");
         client.print(fileName);
         client.println("\"");
