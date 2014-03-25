@@ -32,7 +32,7 @@ ARDUINO_PINS_DIR = ${ARDUINO_BASE_DIR}/hardware/arduino/variants/mega
 # Include the libraries that you want. This are subfolders of "arduino-1.0.4/libraries" folder:
 INCLUDE_LIBS=EEPROM;StandardCplusplus-master;Time;OneWire;\
 dallas-temperature-control;LiquidCrystal;SD;SD/utility;\
-Ethernet;Ethernet/utility;SPI;Wire;Wire/utility;DS1307RTC
+Ethernet;Ethernet/utility;SPI;Wire;Wire/utility;DS1307RTC;MemoryFree
 #INCLUDE_LIBS=EEPROM;Esplora;Ethernet;Ethernet/utility;Firmata;GSMSHIELD;\
 LiquidCrystal;MemoryFree;RTClib;SD;SD/utility;Servo;SoftwareSerial;SPI;\
 Stepper;WiFi;WiFi/utility;Wire;Wire/utility;\

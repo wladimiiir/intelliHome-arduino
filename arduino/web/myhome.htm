@@ -1,0 +1,146 @@
+<html>
+<head>
+    <title>myHome</title>
+    <script>
+        function GetArduinoInputs() {
+            nocache = "&nocache=" + Math.random() * 1000000;
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status == 200) {
+                        if (this.responseXML != null) {
+                            var values = this.responseXML.getElementsByTagName('inputs')[0].children;
+                            for (var i = 0; i < values.length; i++) {
+                                var name = values[i].nodeName;
+                                var value = values[i].textContent;
+                                if (document.getElementById(name) != null)
+                                    document.getElementById(name).innerHTML = value;
+                            }
+                        }
+                    }
+                }
+            }
+            request.open("GET", "arduino_inputs" + nocache, true);
+            request.send(null);
+            setTimeout('GetArduinoInputs()', 1000);
+        }
+    </script>
+</head>
+<body onload="GetArduinoInputs()" style="background-color: #f9ffde">
+<div id="mainDiv" style="width: 600px; margin: 0 auto">
+    <div style="background-color: #005555;height: 40px">
+        <p style="text-align: center">
+            <img style="vertical-align:bottom;margin-left:8px;width: 30px;height: 30px"
+                 src="https://dl.dropboxusercontent.com/u/14252832/pics/house.png"/>
+        <span style="color: #f9ffde;text-shadow: 2px 2px 5px #cdeea0;"><span
+                style="font-family:  georgia, serif; "><span
+                style="font-size: 32px; font-weight: bold">myHome</span></span></span><br/>
+        </p>
+    </div>
+    <div style="border: solid 5px #005555">
+        <div style="margin: 5px">
+            <img style="width: 15px;height: 15px;" src="https://dl.dropboxusercontent.com/u/14252832/pics/clock.png">
+        <span style="font-style: italic;"><span style="font-family: georgia, serif;"><span
+                style="font-size: 20px; font-weight: bold;">Time</span></span></span><br/>
+            <span id="currentTime" style="font-family: georgia, serif;">Reading...</span>
+
+            <p>
+                <img style="width: 15px;height: 15px;"
+                     src="https://dl.dropboxusercontent.com/u/14252832/pics/thermometer.png">
+            <span style="font-style: italic;"><strong
+                    style="font-family: georgia, serif; font-size: 20px;">Temperatures</strong></span>
+            <table border="1" cellpadding="3" cellspacing="2" style="width: 100%;background-color: #fafffa">
+                <thead style="background-color: #47564d; color: #c8ffc8">
+                <tr>
+                    <th scope="col" width="70%">
+                        <span style="font-family:trebuchet ms,helvetica,sans-serif;">Location</span></th>
+                    <th scope="col" width="30%">
+                        <span style="font-family:trebuchet ms,helvetica,sans-serif;">Temperature</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <span style="font-family:georgia,serif;">Outside</span></td>
+                    <td style="text-align: right;">
+                        <span id="outside" style="font-family:georgia,serif;">Reading...</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span style="font-family:georgia,serif;">Bedroom</span></td>
+                    <td style="text-align: right;">
+                        <span id="bedroom" style="font-family:georgia,serif;">Reading...</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span style="font-family:georgia,serif;">Living room</span></td>
+                    <td style="text-align: right;">
+                        <span id="livingRoom" style="font-family:georgia,serif;">Reading...</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span style="font-family:georgia,serif;">Kitchen</span></td>
+                    <td style="text-align: right;">
+                        <span id="kitchen" style="font-family:georgia,serif;">Reading...</span></td>
+                </tr>
+                <tr>
+                    <td rowspan="3">
+                        <span style="font-family:georgia,serif;">Tank</span></td>
+                    <td style="text-align: right;">
+                        <span id="tankTop" style="font-family:georgia,serif;">Reading...</span></td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        <span id="tankMiddle" style="font-family:georgia,serif;">Reading...</span></td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">
+                        <span id="tankBottom" style="font-family:georgia,serif;">Reading...</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span style="font-family:georgia,serif;">Floor heating</span></td>
+                    <td style="text-align: right;">
+                        <span id="floorHeating" style="font-family:georgia,serif;">Reading...</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            </p>
+            <p>
+                <img style="width: 15px;height: 15px;"
+                     src="https://dl.dropboxusercontent.com/u/14252832/pics/units.png">
+            <span style="font-style: italic;"><span style="font-family: georgia, serif; "><span
+                    style="font-size: 20px; font-weight: bold;">Units</span></span></span><br/>
+            <table border="1" cellpadding="3" cellspacing="2" style="width: 100%;background-color: #fafffa">
+                <thead style="background-color: #47564d; color: #c8ffc8">
+                <tr>
+                    <th scope="col" width="70%">
+                        <span style="font-family:trebuchet ms,helvetica,sans-serif;">Unit</span></th>
+                    <th scope="col" width="30%">
+                        <span style="font-family:trebuchet ms,helvetica,sans-serif;">State</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <span style="font-family:georgia,serif;">Floor heating</span></td>
+                    <td style="text-align: right;">
+                        <span id="floorHeatingState" style="font-family:georgia,serif;">Reading...</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <span style="font-family:georgia,serif;">Electric heater</span></td>
+                    <td style="text-align: right;">
+                        <span id="electricHeaterState" style="font-family:georgia,serif;">Reading...</span>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

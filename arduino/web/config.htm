@@ -1,0 +1,137 @@
+<html>
+<head>
+    <title>myHome</title>
+    <script>
+        function GetConfigValues() {
+            nocache = "&nocache=" + Math.random() * 1000000;
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status == 200) {
+                        if (this.responseXML != null) {
+                            var values = this.responseXML.getElementsByTagName('values')[0].children;
+                            for (var i = 0; i < values.length; i++) {
+                                var id = values[i].nodeName;
+                                var value = values[i].textContent;
+                                var element = document.getElementById(id);
+                                if (element == null)
+                                    return;
+
+                                if (element.className == 'field') {
+                                    element.value = value;
+                                } else if (element.className == 'choice') {
+                                    var buttons = element.children;
+                                    for (var j = 0; j < buttons.length; j++) {
+                                        var button = buttons[j];
+                                        if (button.id.indexOf(value) != -1) {
+                                            button.checked = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            request.open("GET", "arduino_config_values" + nocache, true);
+            request.send(null);
+        }
+
+        function GetValue(key) {
+            var element = document.getElementById(key);
+
+            if (element.className == 'field') {
+                return element.value;
+            } else if (element.className == 'choice') {
+                var buttons = element.children;
+                for (var i = 0; i < buttons.length; i++) {
+                    var button = buttons[i];
+                    if (button.checked) {
+                        return button.id.substr(key.length);
+                    }
+                }
+            } else {
+                return null;
+            }
+        }
+
+        function SetValue(key, value) {
+            if (value == null) {
+                value = GetValue(key);
+                if (value == null) {
+                    return;
+                }
+            }
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                document.getElementById("electricHeaterAuto").checked = true;
+                if (this.readyState == 4) {
+                    if (this.status == 200) {
+                        GetConfigValues();
+                    } else {
+                        alert('Error occured while saving: ' + key + '=' + value);
+                    }
+                }
+            }
+            request.open("GET", "set_config?" + key + "=" + value, true);
+            request.send(null);
+        }
+    </script>
+</head>
+<body onload="GetConfigValues()" style="background-color: #f9ffde">
+<div id="mainDiv" style="width: 600px; margin: 0 auto">
+    <div style="background-color: #005555;height: 40px">
+        <p style="text-align: center">
+            <img style="vertical-align:bottom;margin-left:8px;width: 30px;height: 30px"
+                 src="https://dl.dropboxusercontent.com/u/14252832/pics/house.png"/>
+        <span style="color: #f9ffde;text-shadow: 2px 2px 5px #cdeea0;"><span
+                style="font-family:  georgia, serif; "><span
+                style="font-size: 32px; font-weight: bold">myHome</span></span></span><br/>
+        </p>
+    </div>
+    <div style="border: solid 5px #005555">
+        <div style="margin: 5px">
+            <span style="font-style: italic;"><strong
+                    style="font-family: georgia, serif; font-size: 20px;">Configuration</strong></span>
+            <table cellpadding="2" cellspacing="1" style="width: 100%">
+                <tbody>
+                <tr>
+                    <td><span>Bedroom min. temperature</span></td>
+                    <td>
+                        <input class="field" id="bedroomMinTemp" value="Reading..."/></td>
+                    <td>
+                        <button onclick="SetValue('bedroomMinTemp')">Set</button>
+                        <button onclick="SetValue('bedroomMinTemp', 'auto')">Use automatic</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span>Bedroom max. temperature</span></td>
+                    <td>
+                        <input class="field" id="bedroomMaxTemp" value="Reading..."/>
+                    </td>
+                    <td>
+                        <button onclick="SetValue('bedroomMaxTemp')">Set</button>
+                        <button onclick="SetValue('bedroomMinTemp', 'auto')">Use automatic</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span>Electric heater</span></td>
+                    <td>
+                        <div id="electricHeater" class="choice">
+                            <input type="radio" id="electricHeaterOn" name="electricHeaterToggle"> On
+                            <input type="radio" id="electricHeaterOff" name="electricHeaterToggle"> Off
+                            <input type="radio" id="electricHeaterAuto" name="electricHeaterToggle"> Auto
+                        </div>
+                    </td>
+                    <td>
+                        <button onclick="SetValue('electricHeater')">Set</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
