@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/bedroom"
+            android:id="@+id/bedroomLabel" android:layout_marginLeft="5dp" android:layout_marginTop="5dp"
+            android:textColor="#ffe25d" android:textStyle="bold"/>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp">
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/bedroomMinTemp" android:layout_weight="1.00" android:layout_gravity="center_vertical"
+                android:inputType="numberDecimal"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/separator"
+                android:id="@+id/separator" android:layout_gravity="center_vertical"/>
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/bedroomMaxTemp" android:layout_weight="1" android:layout_gravity="center_vertical"
+                android:inputType="numberDecimal"/>
+        <GridLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:rowCount="2"
+                android:columnCount="1">
+            <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:onClick="increaseTemperature"
+                    android:layout_width="40dp"
+                    android:layout_height="25dp"
+                    android:id="@+id/tempUpButton" android:layout_row="0" android:layout_column="0"/>
+            <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:onClick="decreaseTemperature"
+                    android:layout_width="40dp"
+                    android:layout_height="25dp"
+                    android:id="@+id/tempDownButton" android:layout_row="1" android:layout_column="0"/>
+        </GridLayout>
+        <Button
+                style="?android:attr/buttonStyleSmall"
+                android:onClick="setManualTemperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set"
+                android:id="@+id/temperatureSet" android:width="75dp" android:layout_marginLeft="5dp"/>
+        <Button
+                style="?android:attr/buttonStyleSmall"
+                android:onClick="setAutoTemperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/auto"
+                android:id="@+id/temperatureAuto" android:width="75dp"/>
+    </LinearLayout>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/electric_heater"
+            android:id="@+id/electriHeaterLabel" android:layout_marginLeft="5dp" android:layout_marginTop="10dp"
+            android:textColor="#ffe25d" android:textStyle="bold"/>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginRight="10dp">
+        <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:layout_gravity="center_vertical">
+            <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/on"
+                    android:id="@+id/electricHeaterOn" android:checked="false"/>
+            <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/off"
+                    android:id="@+id/electricHeaterOff" android:checked="false"/>
+            <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/auto"
+                    android:id="@+id/electricHeaterAuto" android:checked="false"/>
+
+        </RadioGroup>
+
+        <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <Button
+                style="?android:attr/buttonStyleSmall"
+                android:onClick="setElectricHeaterState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set"
+                android:id="@+id/electricHeaterSet" android:width="75dp" android:layout_marginLeft="5dp"/>
+    </LinearLayout>
+</LinearLayout>

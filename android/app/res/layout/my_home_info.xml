@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<GridLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+        android:paddingTop="15dp">
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/time"
+            android:id="@+id/timeLabel" android:layout_row="0" android:layout_column="0" android:textStyle="bold"
+            android:layout_marginLeft="5dp" android:textColor="#ffe25d"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/outside"
+            android:id="@+id/outsideLabel" android:layout_row="3" android:layout_column="0"
+            android:layout_marginLeft="20dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/bedroom"
+            android:id="@+id/bedroomLabel" android:layout_row="4" android:layout_column="0"
+            android:layout_marginLeft="20dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/kitchen" android:layout_row="5" android:layout_column="1"
+            android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/bedroom" android:layout_row="4" android:layout_column="1"
+            android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/kitchen"
+            android:id="@+id/kitchenLabel" android:layout_row="5" android:layout_column="0"
+            android:layout_marginLeft="20dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/tank"
+            android:id="@+id/tankLabel" android:layout_row="6" android:layout_column="0" android:layout_rowSpan="3"
+            android:layout_gravity="center_vertical" android:layout_marginLeft="20dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/tankTop" android:layout_row="6" android:layout_column="1"
+            android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/tankMiddle" android:layout_row="7" android:layout_column="1"
+            android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/tankBottom" android:layout_row="8" android:layout_column="1"
+            android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/floor_heating"
+            android:id="@+id/floorHeatingLabel" android:layout_row="9" android:layout_column="0"
+            android:layout_marginLeft="20dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/currentTime" android:layout_row="1" android:layout_column="0" android:layout_marginLeft="20dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/temperatures"
+            android:id="@+id/textView" android:layout_row="2" android:layout_column="0" android:textStyle="bold"
+            android:layout_marginTop="10dp" android:layout_marginLeft="5dp" android:textColor="#ffe25d"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/outside" android:layout_row="3" android:layout_column="1"
+            android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/floorHeating" android:layout_row="9" android:layout_column="1"
+            android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/fireplace_exchanger"
+            android:id="@+id/fireplaceExchangerLabel" android:layout_row="10" android:layout_column="0"
+            android:layout_marginLeft="20dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/reading"
+            android:id="@+id/fireplaceExchanger" android:layout_row="10" android:layout_column="1"
+            android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/units"
+            android:id="@+id/textView2" android:layout_row="11" android:layout_column="0" android:textStyle="bold"
+            android:layout_marginTop="10dp" android:layout_marginLeft="5dp" android:textColor="#ffe25d"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/electric_heater"
+            android:id="@+id/electricHeaterLabel" android:layout_row="12" android:layout_column="0"
+            android:layout_marginLeft="20dp"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:textAppearance="?android:attr/textAppearanceMedium" android:text="@string/reading"
+              android:id="@+id/electricHeaterState" android:layout_row="12" android:layout_column="1"
+              android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:textAppearance="?android:attr/textAppearanceMedium" android:text="Floor heating"
+              android:id="@+id/floorHeatingUnitLabel" android:layout_row="13" android:layout_column="0"
+              android:layout_marginLeft="20dp"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:textAppearance="?android:attr/textAppearanceMedium" android:text="@string/reading"
+              android:id="@+id/floorHeatingState" android:layout_row="13" android:layout_column="1"
+              android:layout_gravity="right" android:layout_marginRight="20dp" android:editable="true"/>
+</GridLayout>

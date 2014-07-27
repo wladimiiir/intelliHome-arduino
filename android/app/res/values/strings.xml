@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">intelliHome</string>
+    <string name="settings">Settings</string>
+    <string name="myHome">myHome</string>
+    <string name="config">configuration</string>
+    <string name="time">Time</string>
+    <string name="outside">Outside</string>
+    <string name="bedroom">Bedroom</string>
+    <string name="kitchen">Kitchen</string>
+    <string name="tank">Tank</string>
+    <string name="floor_heating">Floor heating</string>
+    <string name="reading">Reading...</string>
+    <string name="temperatures">Temperatures</string>
+    <string name="units">Units</string>
+    <string name="electric_heater">Electric heater</string><string name="on">On</string><string name="off">Off</string><string name="auto">Auto</string><string name="set">Set</string><string name="separator">-</string><string name="exit">exit</string>
+    <string name="fireplace_exchanger">Fireplace</string>
+    <string name="serverIP">Server address</string>
+    <string name="menuvalues">value1;value2,value3</string>
+</resources>

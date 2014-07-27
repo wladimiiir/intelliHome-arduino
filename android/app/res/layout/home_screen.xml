@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" android:gravity="center_vertical">
+
+    <Button
+            android:onClick="showMyHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/myHome"
+            android:id="@+id/myHome" android:layout_gravity="center_horizontal" android:width="200dp"
+            android:textColor="#ffe25d" android:textStyle="bold"/>
+    <Button
+            android:onClick="showConfiguration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/config"
+            android:id="@+id/configuration" android:layout_gravity="center_horizontal" android:width="200dp"
+            android:textColor="#ffe25d" android:textStyle="bold"/>
+    <Button android:onClick="exit" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/exit" android:id="@+id/exit" android:layout_gravity="center_horizontal"
+            android:width="200dp" android:textColor="#ffe25d" android:textStyle="bold"/>
+</LinearLayout>
