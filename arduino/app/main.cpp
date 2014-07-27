@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Time.h>
-#include <LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
 #include <Ethernet.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -34,12 +34,14 @@
 
 #define SD_CS_PIN                        4
 
-#define ONE_WIRE_D18B20_SENSORS_PIN     43
+#define ONE_WIRE_D18B20_SENSORS_PIN     38
 
-#define FH_3VALVE_LOW_RELAY_PIN         22
-#define FH_3VALVE_HIGH_RELAY_PIN        23
-#define FH_PUMP_RELAY_PIN               24
-#define ELECTRIC_HEATER_RELAY_PIN       25
+#define ELECTRIC_HEATER_RELAY_PIN       2
+#define FH_3VALVE_LOW_RELAY_PIN         3
+#define FH_3VALVE_HIGH_RELAY_PIN        5
+#define FH_PUMP_RELAY_PIN               6
+
+#define IR_REMOTE_PIN                   12
 
 //web components
 byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
@@ -55,6 +57,7 @@ DeviceAddress tankTopThermometerAddress = {0x28, 0xD8, 0x75, 0x38, 0x05, 0x00, 0
 DeviceAddress tankMidThermometerAddress = {0x28, 0x0A, 0xE3, 0x55, 0x05, 0x00, 0x00, 0x29};
 DeviceAddress tankBottomThermometerAddress = {0x28, 0x10, 0x93, 0x56, 0x05, 0x00, 0x00, 0x58};
 DeviceAddress floorHeatingThermometerAddress = {0x28, 0xD5, 0x92, 0x55, 0x05, 0x00, 0x00, 0x69};
+DeviceAddress fireplaceExchangerThermometerAddress = {0x28, 0x53, 0x60, 0x30, 0x05, 0x00, 0x00, 0x05};
 
 //thermometers
 MultiSensorProvider oneWireSensorProvider(ONE_WIRE_D18B20_SENSORS_PIN);
@@ -65,24 +68,25 @@ D18B20Thermometer tankBottomLevelThermometer(&oneWireSensorProvider, &tankBottom
 D18B20Thermometer outsideThermometer(&oneWireSensorProvider, &outsideThermometerAddress);
 D18B20Thermometer bedroomThermometer(&oneWireSensorProvider, &bedroomThermometerAddress);
 D18B20Thermometer kitchenThermometer(&oneWireSensorProvider, &kitchenThermometerAddress);
+D18B20Thermometer fireplaceExchangerThermometer(&oneWireSensorProvider, &fireplaceExchangerThermometerAddress);
 
 //electric heater
 WeeklyRunStrategy electricHeaterRunner;
 RelayUnit electricHeaterRelay(ELECTRIC_HEATER_RELAY_PIN);
 ConfigurableStateUnit electricHeaterUnit(&electricHeaterRelay);
-ElectricHeaterUnit electricHeater(&tankTopLevelThermometer, &electricHeaterUnit, 42.0);
+ElectricHeaterUnit electricHeater(&tankTopLevelThermometer, &electricHeaterUnit, 41.0);
 RunnerUnit electricHeaterRunnerUnit(&electricHeaterRunner, &electricHeater);
 
 //floor heating components
 ThreeWayValveController floorHeatingValve(&floorHeatingThermometer, FH_3VALVE_LOW_RELAY_PIN, FH_3VALVE_HIGH_RELAY_PIN);
 DailyTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource;
 FloorHeatingUnit floorHeatingUnit(
-        new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(30, 34)),
+        new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(30, 32)),
         new RelayUnit(FH_PUMP_RELAY_PIN),
-        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, 34.0, 1000l * 10, 1000l * 60 * 10)
+        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, 32.0, 1000l * 10, 1000l * 60 * 10)
         );
 DailyTemperatureDefinitionSource autoBedroomTemperatureDefinitionSource;
-ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(&autoBedroomTemperatureDefinitionSource);
+ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(new SimpleTemperatureDefinitionSource(11.5, 12.0));
 DailyRunStrategy floorHeatingIdleRunner;
 
 //main temperature controller
@@ -90,11 +94,12 @@ TemperatureController roomTempController(
         &bedroomThermometer,
         &bedroomTemperatureDefinitionSource,
         new StartStopUnit(&floorHeatingUnit, MINUTE(20), MINUTE(5)),
-        new RunnerUnit(&floorHeatingIdleRunner, &floorHeatingUnit)
+        NULL
+        //        new RunnerUnit(&floorHeatingIdleRunner, &floorHeatingUnit)
         );
 
 //lcd
-LiquidCrystal lcd(48, 46, 30, 32, 34, 36);
+LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 LCDDisplay lcdDisplay(&lcd);
 
 //loggers
@@ -114,12 +119,12 @@ void setupThreeWayValveControllers() {
 }
 
 void setupRunTimeSources() {
-    for (int hour = 16; hour <= 23; hour++) {
+    for (int hour = 15; hour <= 23; hour++) {
         floorHeatingIdleRunner.addRunTime(hour, 0, 0, hour, 10, 0);
     }
-    electricHeaterRunner.addRunTime(MONDAY, 17, 0, 0, 19, 0, 0);
-    electricHeaterRunner.addRunTime(WEDNESDAY, 17, 0, 0, 19, 0, 0);
-    electricHeaterRunner.addRunTime(SATURDAY, 14, 0, 0, 17, 0, 0);
+    electricHeaterRunner.addRunTime(MONDAY, 18, 0, 0, 19, 0, 0);
+    electricHeaterRunner.addRunTime(WEDNESDAY, 18, 0, 0, 19, 0, 0);
+    electricHeaterRunner.addRunTime(SATURDAY, 16, 0, 0, 18, 0, 0);
 }
 
 void setupTemperatureDefinitionSources() {
@@ -128,7 +133,10 @@ void setupTemperatureDefinitionSources() {
     //    roomTemperatureDefinitionSource.add(14, 0, 15, 0, 20.5, 21.0);
     //    roomTemperatureDefinitionSource.add(15, 0, 22, 0, 21.5, 22.0);
 
-    autoBedroomTemperatureDefinitionSource.add(0, 0, 23, 59, 20.5, 21.0);
+    autoBedroomTemperatureDefinitionSource.add(0, 0, 14, 59, 18.5, 19.5);
+    autoBedroomTemperatureDefinitionSource.add(15, 0, 18, 59, 20.5, 21.0);
+    autoBedroomTemperatureDefinitionSource.add(19, 0, 20, 59, 20.0, 20.5);
+    autoBedroomTemperatureDefinitionSource.add(21, 0, 23, 59, 19.5, 20.0);
 
     //    roomTemperatureDefinitionSource.add(20, 0, 23, 59, 19.5, 21.0);
     //    roomTemperatureDefinitionSource.add(17, 0, 20, 0, 21.5, 22.0);
@@ -140,13 +148,24 @@ void setupTemperatureDefinitionSources() {
 }
 
 void setupLCDDisplay() {
+    Serial.println("Initializing LCD...");
+
     LCDSpecialCharacters::initSpecialCharacters(&lcd);
     lcd.begin(16, 2);
     lcd.write("Starting...");
 
+    for (int i = 0; i < 3; i++) {
+        lcd.backlight();
+        delay(250);
+        lcd.noBacklight();
+        delay(250);
+    }
+//    lcd.backlight(); // finish with backlight on  
+
     lcdDisplay.addLCDInfo(new TimeLCDInfo());
     lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Bedroom         ", &bedroomThermometer));
     lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Kitchen         ", &kitchenThermometer));
+    lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Fireplace       ", &fireplaceExchangerThermometer));
     lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Floor heating   ", &floorHeatingThermometer));
     lcdDisplay.addLCDInfo(new TankTemperatureLDCInfo(&tankTopLevelThermometer, &tankMidLevelThermometer, &tankBottomLevelThermometer));
     lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Outside         ", &outsideThermometer));
@@ -159,6 +178,7 @@ void setupLoggers() {
     temperatureLogger.registerThermometer(&tankTopLevelThermometer);
     temperatureLogger.registerThermometer(&tankMidLevelThermometer);
     temperatureLogger.registerThermometer(&tankBottomLevelThermometer);
+    temperatureLogger.registerThermometer(&fireplaceExchangerThermometer);
 
     unitStateLogger.registerStateUnit(&floorHeatingUnit);
     unitStateLogger.registerStateUnit(&electricHeaterUnit);
@@ -166,7 +186,8 @@ void setupLoggers() {
 
 void setupSDCard() {
     pinMode(53, OUTPUT); //SS pin
-
+//        digitalWrite(53, HIGH);
+    
     if (!SD.begin(SD_CS_PIN)) {
         lcd.clear();
         lcd.write("SD card:");
@@ -195,6 +216,7 @@ void setupWebServer() {
     server.registerThermometerReplace("tankMiddle", &tankMidLevelThermometer);
     server.registerThermometerReplace("tankBottom", &tankBottomLevelThermometer);
     server.registerThermometerReplace("floorHeating", &floorHeatingThermometer);
+    server.registerThermometerReplace("fireplaceExchanger", &fireplaceExchangerThermometer);
 
     server.registerStateUnitReplace("floorHeatingState", &floorHeatingUnit);
     server.registerStateUnitReplace("electricHeaterState", &electricHeaterUnit);
@@ -216,12 +238,12 @@ void setupTime() {
     bool externalSet = false;
     if (externalSet) {
         tmElements_t time;
-        time.Day = 25;
-        time.Month = 3;
+        time.Day = 26;
+        time.Month = 7;
         time.Year = 2014 - 1970;
 
-        time.Hour = 18;
-        time.Minute = 47;
+        time.Hour = 21;
+        time.Minute = 58;
         time.Second = 30;
         RTC.write(time);
     }
@@ -233,16 +255,29 @@ void setup() {
     Serial.begin(9600);
     analogReference(INTERNAL1V1);
 
+    setupLCDDisplay();
     setupTime();
     setupThreeWayValveControllers();
     setupRunTimeSources();
     setupTemperatureDefinitionSources();
-    setupLCDDisplay();
     setupLoggers();
     setupSDCard();
     setupConfigManager();
     setupWebServer();
     oneWireSensorProvider.printAddresses();
+
+    pinMode(31, OUTPUT);
+    digitalWrite(31, HIGH);
+
+//    for (int i = 0; i < 3; i++) {
+//        digitalWrite(FH_3VALVE_LOW_RELAY_PIN, LOW);
+//        delay(5000);
+//        digitalWrite(FH_3VALVE_LOW_RELAY_PIN, HIGH);
+//        delay(500);
+//        digitalWrite(FH_3VALVE_HIGH_RELAY_PIN, LOW);
+//        delay(5000);
+//        digitalWrite(FH_3VALVE_HIGH_RELAY_PIN, HIGH);
+//    }
 }
 
 /* Main heating process function */
@@ -266,13 +301,13 @@ void processFailsafeActions() {
     if (nextLCDRestart < millis()) {
         LCDSpecialCharacters::initSpecialCharacters(&lcd);
         lcd.begin(16, 2);
-        nextLCDRestart = millis() + 5 * 60 * 1000l;
+        nextLCDRestart = millis() + 60 * 1000l;
     }
 }
 
 /* Main loop function */
 void loop() {
-    processFailsafeActions();
+    //    processFailsafeActions();
     processHeating();
     lcdDisplay.refresh();
     temperatureLogger.process();

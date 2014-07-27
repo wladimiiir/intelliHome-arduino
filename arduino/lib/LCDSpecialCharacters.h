@@ -18,7 +18,7 @@
 class LCDSpecialCharacters {
 public:
 
-    static void initSpecialCharacters(LiquidCrystal* lcd) {
+    static void initSpecialCharacters(LCD* lcd) {
         lcd->createChar(SPECIAL_CHAR_TANK_TOP, topTankChar);
         lcd->createChar(SPECIAL_CHAR_TANK_MIDDLE, middleTankChar);
         lcd->createChar(SPECIAL_CHAR_TANK_BOTTOM, bottomTankChar);

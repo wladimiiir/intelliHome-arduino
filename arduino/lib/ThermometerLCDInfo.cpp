@@ -14,7 +14,7 @@ description(description),
 thermometer(thermometer) {
 }
 
-long ThermometerLCDInfo::showInLCD(LiquidCrystal* lcd) {
+long ThermometerLCDInfo::showInLCD(LCD* lcd) {
     lcd->clear();
     lcd->print(description);
     lcd->setCursor(0, 1);

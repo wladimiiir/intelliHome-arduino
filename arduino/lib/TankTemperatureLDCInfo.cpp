@@ -17,7 +17,7 @@ bottom(bottom) {
     nextShowTime = 0;
 }
 
-long TankTemperatureLDCInfo::showInLCD(LiquidCrystal* lcd) {
+long TankTemperatureLDCInfo::showInLCD(LCD* lcd) {
     if (nextShowTime == 0)
         nextShowTime = millis() + SHOW_TIME;
     
@@ -47,7 +47,7 @@ long TankTemperatureLDCInfo::showInLCD(LiquidCrystal* lcd) {
     }
 }
 
-void showTankTemperature(LiquidCrystal* lcd, byte tankChar, float temperature) {
+void showTankTemperature(LCD* lcd, byte tankChar, float temperature) {
     lcd->write(tankChar);
     lcd->print(" ");
     lcd->print(temperature);
@@ -56,15 +56,15 @@ void showTankTemperature(LiquidCrystal* lcd, byte tankChar, float temperature) {
     lcd->print("C");
 }
 
-void TankTemperatureLDCInfo::showTopTank(LiquidCrystal* lcd) {
+void TankTemperatureLDCInfo::showTopTank(LCD* lcd) {
     showTankTemperature(lcd, SPECIAL_CHAR_TANK_TOP, top->getTemperature());
 }
 
-void TankTemperatureLDCInfo::showMiddleTank(LiquidCrystal* lcd) {
+void TankTemperatureLDCInfo::showMiddleTank(LCD* lcd) {
     showTankTemperature(lcd, SPECIAL_CHAR_TANK_MIDDLE, middle->getTemperature());
 }
 
-void TankTemperatureLDCInfo::showBottomTank(LiquidCrystal* lcd) {
+void TankTemperatureLDCInfo::showBottomTank(LCD* lcd) {
     showTankTemperature(lcd, SPECIAL_CHAR_TANK_BOTTOM, bottom->getTemperature());
 }
 

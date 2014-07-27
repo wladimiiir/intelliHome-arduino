@@ -28,14 +28,14 @@ bool ElectricHeaterUnit::shouldRun() {
         return true;
     }
 
-    if (startedTime == 0 && millis() - stoppedTime >= stopTime) {
+    if (stopTime != 0 && startedTime == 0 && millis() - stoppedTime >= stopTime) {
         startedTime = millis();
         stoppedTime = 0;
         heating = false;
         return true;
     }
 
-    if (stoppedTime == 0 && millis() - startedTime >= runTime) {
+    if (runTime != 0 && stoppedTime == 0 && millis() - startedTime >= runTime) {
         startedTime = 0;
         stoppedTime = millis();
         heating = false;

@@ -20,7 +20,7 @@ enum TankPosition {
 class TankTemperatureLDCInfo : public LCDInfo {
 public:
     TankTemperatureLDCInfo(Thermometer* top, Thermometer* middle, Thermometer* bottom);
-    long showInLCD(LiquidCrystal* lcd);
+    long showInLCD(LCD* lcd);
 private:
     Thermometer* top;
     Thermometer* middle;
@@ -29,9 +29,9 @@ private:
     TankPosition currentPosition;
     unsigned long nextShowTime;
     
-    void showTopTank(LiquidCrystal* lcd);
-    void showMiddleTank(LiquidCrystal* lcd);
-    void showBottomTank(LiquidCrystal* lcd);
+    void showTopTank(LCD* lcd);
+    void showMiddleTank(LCD* lcd);
+    void showBottomTank(LCD* lcd);
 };
 
 #endif	/* TANKTEMPERATURELDCINFO_H */

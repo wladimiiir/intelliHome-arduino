@@ -19,7 +19,7 @@
 
 class LCDDisplay {
 public:
-    LCDDisplay(LiquidCrystal* lcd);
+    LCDDisplay(LCD* lcd);
     void addLCDInfo(LCDInfo* lcdInfo);
     void addLCDSetting(LCDSetting* lcdSetting);
     void switchToIdleMode();
@@ -35,7 +35,7 @@ public:
     
     void refresh();
 private:
-    LiquidCrystal* lcd;
+    LCD* lcd;
     long infoDelay;
     std::vector<LCDInfo*> lcdInfos;
     std::vector<LCDSetting*> lcdSettings;

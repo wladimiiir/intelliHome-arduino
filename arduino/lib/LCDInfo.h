@@ -9,11 +9,11 @@
 #define	LCDINFO_H
 
 #include <Arduino.h>
-#include <LiquidCrystal.h>
+#include <LCD.h>
 
 class LCDInfo {
 public:
-    virtual long showInLCD(LiquidCrystal* lcd) = 0;
+    virtual long showInLCD(LCD* lcd) = 0;
 };
 
 #endif	/* LCDINFO_H */

@@ -20,7 +20,7 @@
 #include "FileLogger.h"
 
 #define BUFFER_SIZE     32
-#define DEBUG           true
+#define DEBUG           false
 
 class WebServer {
 public:
@@ -36,7 +36,10 @@ private:
     std::map<String, Thermometer*> thermometerReplaceMap;
     std::map<String, StateUnit*> stateUnitReplaceMap;
     Logger* logger;
+    unsigned long coolerStartTime;
     
+    void checkCooler();
+    void startCooler();
     bool checkAuthentication(EthernetClient client);
     void setMainPage(EthernetClient client);
     void setStatsPage(EthernetClient client);

@@ -13,6 +13,7 @@
 WebServer::WebServer(uint16_t port) {
     this->server = new EthernetServer(port);
     this->logger = new FileLogger("webserv.txt");
+    this->coolerStartTime = 0;
 }
 
 void WebServer::setConfigManager(ConfigManager* manager) {
@@ -36,11 +37,31 @@ bool WebServer::checkAuthentication(EthernetClient client) {
     return true;
 }
 
+void WebServer::checkCooler() {
+    if (coolerStartTime == 0)
+        return;
+
+    if (millis() - coolerStartTime > 60 * 1000l) {
+        digitalWrite(31, LOW);
+        coolerStartTime = 0;
+    }
+}
+
+void WebServer::startCooler() {
+    if(coolerStartTime == 0) {
+        digitalWrite(31, HIGH);
+    }
+    coolerStartTime = millis();
+}
+
 void WebServer::process() {
     EthernetClient client = server->available();
+
+//    checkCooler();
     if (!client) {
         return;
     }
+//    startCooler();
     if (!checkAuthentication(client)) {
         return;
     }
@@ -225,7 +246,7 @@ void WebServer::setConfig(EthernetClient client, String key, String value) {
 }
 
 String getMimeType(String fileName) {
-    if(fileName.endsWith(".CSV")) {
+    if (fileName.endsWith(".CSV")) {
         return "text/csv";
     } else {
         return "text/plain";

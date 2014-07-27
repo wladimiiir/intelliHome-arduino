@@ -16,7 +16,7 @@
 class ThermometerLCDInfo : public LCDInfo {
 public:
     ThermometerLCDInfo(String description, Thermometer* thermometer);
-    long showInLCD(LiquidCrystal* lcd);
+    long showInLCD(LCD* lcd);
 private:
     String description;
     Thermometer* thermometer;

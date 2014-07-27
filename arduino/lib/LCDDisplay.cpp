@@ -7,7 +7,7 @@
 
 #include "LCDDisplay.h"
 
-LCDDisplay::LCDDisplay(LiquidCrystal* lcd) :
+LCDDisplay::LCDDisplay(LCD* lcd) :
 lcd(lcd) {
     infoDelay = 1500;
     nextRefreshTime = 0;

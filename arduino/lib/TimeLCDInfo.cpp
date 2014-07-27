@@ -13,7 +13,7 @@
 TimeLCDInfo::TimeLCDInfo() {
 }
 
-long TimeLCDInfo::showInLCD(LiquidCrystal* lcd) {
+long TimeLCDInfo::showInLCD(LCD* lcd) {
     lcd->clear();
 
     lcd->print(AppHelper::getDateString());
