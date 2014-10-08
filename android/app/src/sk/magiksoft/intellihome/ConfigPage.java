@@ -92,13 +92,31 @@ public class ConfigPage extends Activity {
         }
     }
 
+    public void setFloorHeatingState(View view) {
+        final RadioButton on = (RadioButton) findViewById(R.id.floorHeatingOn);
+        final RadioButton off = (RadioButton) findViewById(R.id.floorHeatingOff);
+        final RadioButton auto = (RadioButton) findViewById(R.id.floorHeatingAuto);
+
+        if (on.isChecked()) {
+            setValue("floorHeating", "On", false);
+        } else if (off.isChecked()) {
+            setValue("floorHeating", "Off", false);
+        } else if (auto.isChecked()) {
+            setValue("floorHeating", "Auto", false);
+        }
+    }
+
     private void setValue(String key, String value, final boolean reloadConfigValues) {
+        setValue(key, value, null, reloadConfigValues);
+    }
+
+    private void setValue(String key, String value, final Integer runTimeSeconds, final boolean reloadConfigValues) {
         new AsyncTask<String, Void, Void>() {
             @Override
             protected Void doInBackground(String... params) {
                 if (isNetworkAvailable()) {
                     try {
-                        final URL url = new URL("http://" + serverIP + ":776/set_config?" + params[0] + "=" + params[1]);
+                        final URL url = new URL("http://" + serverIP + ":776/set_config?" + params[0] + '=' + params[1] + (runTimeSeconds == null ? "" : (';' + runTimeSeconds)));
                         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
                         connection.setRequestMethod("GET");
@@ -128,8 +146,8 @@ public class ConfigPage extends Activity {
             Double minValue = Double.valueOf(minTemp.getText().toString());
             Double maxValue = Double.valueOf(maxTemp.getText().toString());
 
-            minValue += 1;
-            maxValue += 1;
+            minValue += 0.1;
+            maxValue += 0.1;
             minTemp.setText(minValue.toString());
             maxTemp.setText(maxValue.toString());
         } catch (NumberFormatException e) {
@@ -145,10 +163,21 @@ public class ConfigPage extends Activity {
             Double minValue = Double.valueOf(minTemp.getText().toString());
             Double maxValue = Double.valueOf(maxTemp.getText().toString());
 
-            minValue -= 1;
-            maxValue -= 1;
+            minValue -= 0.1;
+            maxValue -= 0.1;
             minTemp.setText(minValue.toString());
             maxTemp.setText(maxValue.toString());
+        } catch (NumberFormatException e) {
+            return;
+        }
+    }
+
+    public void startFloorHeating(View view) {
+        final TextView timeField = (TextView) findViewById(R.id.floorHeatingTime);
+
+        try {
+            final Integer runTimeSeconds = Integer.valueOf(timeField.getText().toString()) * 60;
+            setValue("floorHeating", "On", runTimeSeconds, false);
         } catch (NumberFormatException e) {
             return;
         }

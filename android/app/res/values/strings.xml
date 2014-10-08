@@ -17,4 +17,7 @@
     <string name="fireplace_exchanger">Fireplace</string>
     <string name="serverIP">Server address</string>
     <string name="menuvalues">value1;value2,value3</string>
+    <string name="floorHeating">Floor heating</string>
+    <string name="minutes">minutes</string>
+    <string name="start">Start</string>
 </resources>

@@ -11,7 +11,7 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/bedroom"
             android:id="@+id/bedroomLabel" android:layout_marginLeft="5dp" android:layout_marginTop="5dp"
-            android:textColor="#ffe25d" android:textStyle="bold"/>
+            android:textColor="#ffe25d" android:textStyle="bold" style="@style/configLabel"/>
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -21,7 +21,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/bedroomMinTemp" android:layout_weight="1.00" android:layout_gravity="center_vertical"
-                android:inputType="numberDecimal"/>
+                android:inputType="number"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/bedroomMaxTemp" android:layout_weight="1" android:layout_gravity="center_vertical"
-                android:inputType="numberDecimal"/>
+                android:inputType="number"/>
         <GridLayout
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
@@ -67,12 +67,9 @@
                 android:id="@+id/temperatureAuto" android:width="75dp"/>
     </LinearLayout>
     <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/electric_heater"
-            android:id="@+id/electriHeaterLabel" android:layout_marginLeft="5dp" android:layout_marginTop="10dp"
-            android:textColor="#ffe25d" android:textStyle="bold"/>
+            android:id="@+id/electriHeaterLabel"
+            style="@style/configLabel"/>
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -110,5 +107,74 @@
                 android:layout_height="wrap_content"
                 android:text="@string/set"
                 android:id="@+id/electricHeaterSet" android:width="75dp" android:layout_marginLeft="5dp"/>
+    </LinearLayout>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/floorHeating"
+            android:id="@+id/floorHeatingLabel" style="@style/configLabel"/>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginRight="10dp">
+        <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:layout_gravity="center_vertical">
+            <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/on"
+                    android:id="@+id/floorHeatingOn" android:checked="false"/>
+            <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/off"
+                    android:id="@+id/floorHeatingOff" android:checked="false"/>
+            <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/auto"
+                    android:id="@+id/floorHeatingAuto" android:checked="false"/>
+        </RadioGroup>
+        <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set"
+                android:id="@+id/floorHeatingSet" android:layout_marginLeft="5dp" android:width="75dp"
+                android:onClick="setFloorHeatingState"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginRight="10dp">
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:id="@+id/floorHeatingTime" android:text="60" android:width="100dp" android:focusable="false"
+                android:inputType="numberDecimal" android:layout_gravity="center_vertical|right"
+                android:gravity="right"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/minutes"
+                android:id="@+id/textView"/>
+        <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+        <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/start"
+                android:id="@+id/floorHeatingStart" android:onClick="startFloorHeating" android:width="75dp"/>
     </LinearLayout>
 </LinearLayout>
