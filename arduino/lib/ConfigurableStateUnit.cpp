@@ -9,25 +9,31 @@
 
 ConfigurableStateUnit::ConfigurableStateUnit(StateUnit* autoStateUnit) :
 autoStateUnit(autoStateUnit),
-manual(false),
-value("Auto") {
+manualProcessing(false),
+previousValue("Auto"),
+value("Auto"),
+changeTime(0) {
 }
 
 void ConfigurableStateUnit::start() {
-    if (manual)
+    if (manualProcessing)
         return;
     autoStateUnit->start();
 }
 
 void ConfigurableStateUnit::stop() {
-    if (manual)
+    if (manualProcessing)
         return;
     autoStateUnit->stop();
 }
 
 void ConfigurableStateUnit::process(float state) {
-    if (manual)
+    if (manualProcessing) {
+        if (changeTime != 0 && changeTime >= millis()) {
+            setValue(previousValue);
+        }
         return;
+    }
     autoStateUnit->process(state);
 }
 
@@ -40,16 +46,21 @@ String ConfigurableStateUnit::getValue() {
 }
 
 void ConfigurableStateUnit::setValue(String value) {
+    this->previousValue = this->value;
+    int separatorIndex = value.indexOf(';');
+    unsigned long forSeconds = separatorIndex > 0 ? atol(value.substring(separatorIndex + 1).c_str()) : 0;
+    value = separatorIndex > 0 ? value.substring(0, separatorIndex) : value;
     if (value.equals("Auto")) {
-        manual = false;
+        manualProcessing = false;
         this->value = value;
     } else if (value.equals("On")) {
         autoStateUnit->start();
-        manual = true;
+        manualProcessing = true;
         this->value = value;
     } else if (value.equals("Off")) {
         autoStateUnit->stop();
-        manual = true;
+        manualProcessing = true;
         this->value = value;
     }
+    changeTime = forSeconds == 0 ? 0 : (millis() + forSeconds * 1000);
 }

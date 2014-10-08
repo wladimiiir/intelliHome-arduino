@@ -22,8 +22,10 @@ public:
     void setValue(String value);
 private:
     StateUnit* autoStateUnit;
-    bool manual;
+    bool manualProcessing;
+    String previousValue;
     String value;
+    unsigned long changeTime;
 };
 
 #endif	/* CONFIGURABLESTATEUNIT_H */

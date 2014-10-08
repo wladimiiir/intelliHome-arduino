@@ -1,4 +1,5 @@
 /* 
+ * 
  * File:   TemperatureController.h
  * Author: wladimiiir
  *
@@ -12,17 +13,24 @@
 #include "Thermometer.h"
 #include "StateUnit.h"
 #include "TemperatureDefinitionSource.h"
+#include "Configurator.h"
 
-class TemperatureController {
+class TemperatureController : public Configurator {
 public:
     TemperatureController(Thermometer* thermometer, TemperatureDefinitionSource* temperatureDefinitionSource, StateUnit* heatingUnit, StateUnit* idleControlUnit);
     void process();
+    void setValue(String value);
+    String getValue();
 private:
     Thermometer* thermometer;
     TemperatureDefinitionSource* temperatureDefinitionSource;
     StateUnit* heatingUnit;
     StateUnit* idleControlUnit;
     bool heating;
+    bool manualProcessing;
+    unsigned long changeTime;
+    String previousValue;
+    String value;
     void startHeatingUnit();
     void stopHeatingUnit();
     void processHeatingUnit(float temperature);

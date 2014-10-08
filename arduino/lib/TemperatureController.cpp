@@ -20,11 +20,25 @@ thermometer(thermometer),
 temperatureDefinitionSource(temperatureDefinitionSource),
 heatingUnit(heatingUnit),
 idleControlUnit(idleControlUnit),
-heating(false) {
+heating(false),
+manualProcessing(false),
+changeTime(0),
+previousValue("Auto"),
+value("Auto") {
 }
 
 void TemperatureController::process() {
     float temperature = thermometer->getTemperature();
+
+    if (manualProcessing) {
+        if (changeTime != 0 && changeTime >= millis()) {
+            setValue(previousValue);
+        }
+        if (heating) {
+            processHeatingUnit(temperature);
+        }
+        return;
+    }
 
     if (heating && temperature >= temperatureDefinitionSource->getMaxTemperature()) {
         stopHeatingUnit();
@@ -37,6 +51,30 @@ void TemperatureController::process() {
     } else {
         processIdleControlUnit(temperature);
     }
+}
+
+void TemperatureController::setValue(String value) {
+    this->previousValue = this->value;
+    int separatorIndex = value.indexOf(';');
+    unsigned long forSeconds = separatorIndex > 0 ? atol(value.substring(separatorIndex + 1).c_str()) : 0;
+    value = separatorIndex > 0 ? value.substring(0, separatorIndex) : value;
+    if (value.equals("Auto")) {
+        manualProcessing = false;
+        this->value = value;
+    } else if (value.equals("On")) {
+        startHeatingUnit();
+        manualProcessing = true;
+        this->value = value;
+    } else if (value.equals("Off")) {
+        stopHeatingUnit();
+        manualProcessing = true;
+        this->value = value;
+    }
+    changeTime = forSeconds == 0 ? 0 : (millis() + forSeconds * 1000);
+}
+
+String TemperatureController::getValue() {
+    return value;
 }
 
 void TemperatureController::startHeatingUnit() {
@@ -81,9 +119,9 @@ void TemperatureController::stopIdleControlUnit() {
 void TemperatureController::processIdleControlUnit(float temperature) {
     if (idleControlUnit == NULL)
         return;
-//    if (temperature > temperatureDefinitionSource->getMaxTemperature()) {
-//        idleControlUnit->stop();
-//        return;
-//    }
+    //    if (temperature > temperatureDefinitionSource->getMaxTemperature()) {
+    //        idleControlUnit->stop();
+    //        return;
+    //    }
     idleControlUnit->process(calculateState(temperatureDefinitionSource->getMinTemperature(), temperatureDefinitionSource->getMaxTemperature(), temperature));
 }

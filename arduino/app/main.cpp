@@ -81,12 +81,13 @@ RunnerUnit electricHeaterRunnerUnit(&electricHeaterRunner, &electricHeater);
 ThreeWayValveController floorHeatingValve(&floorHeatingThermometer, FH_3VALVE_LOW_RELAY_PIN, FH_3VALVE_HIGH_RELAY_PIN);
 DailyTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource;
 FloorHeatingUnit floorHeatingUnit(
-        new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(30, 32)),
+        new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(33, 34)),
         new RelayUnit(FH_PUMP_RELAY_PIN),
-        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, 32.0, 1000l * 10, 1000l * 60 * 10)
+        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, 35.0, 1000l * 10, 1000l * 60 * 10)
         );
 DailyTemperatureDefinitionSource autoBedroomTemperatureDefinitionSource;
-ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(new SimpleTemperatureDefinitionSource(11.5, 12.0));
+ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(&autoBedroomTemperatureDefinitionSource);
+//ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(new SimpleTemperatureDefinitionSource(20.5, 21.0));
 DailyRunStrategy floorHeatingIdleRunner;
 
 //main temperature controller
@@ -115,7 +116,7 @@ void setupThreeWayValveController(ThreeWayValveController* controller, float fro
 }
 
 void setupThreeWayValveControllers() {
-    setupThreeWayValveController(&floorHeatingValve, 30.0, 31.0);
+    setupThreeWayValveController(&floorHeatingValve, 34.0, 35.0);
 }
 
 void setupRunTimeSources() {
@@ -133,10 +134,10 @@ void setupTemperatureDefinitionSources() {
     //    roomTemperatureDefinitionSource.add(14, 0, 15, 0, 20.5, 21.0);
     //    roomTemperatureDefinitionSource.add(15, 0, 22, 0, 21.5, 22.0);
 
-    autoBedroomTemperatureDefinitionSource.add(0, 0, 14, 59, 18.5, 19.5);
-    autoBedroomTemperatureDefinitionSource.add(15, 0, 18, 59, 20.5, 21.0);
-    autoBedroomTemperatureDefinitionSource.add(19, 0, 20, 59, 20.0, 20.5);
-    autoBedroomTemperatureDefinitionSource.add(21, 0, 23, 59, 19.5, 20.0);
+    autoBedroomTemperatureDefinitionSource.add(0, 0, 6, 59, 18.5, 19.5);
+    autoBedroomTemperatureDefinitionSource.add(7, 0, 18, 59, 21.5, 22.0);
+    autoBedroomTemperatureDefinitionSource.add(19, 0, 23, 59, 18.0, 18.5);
+    //    autoBedroomTemperatureDefinitionSource.add(21, 0, 23, 59, 19.5, 20.0);
 
     //    roomTemperatureDefinitionSource.add(20, 0, 23, 59, 19.5, 21.0);
     //    roomTemperatureDefinitionSource.add(17, 0, 20, 0, 21.5, 22.0);
@@ -160,7 +161,7 @@ void setupLCDDisplay() {
         lcd.noBacklight();
         delay(250);
     }
-//    lcd.backlight(); // finish with backlight on  
+    //    lcd.backlight(); // finish with backlight on  
 
     lcdDisplay.addLCDInfo(new TimeLCDInfo());
     lcdDisplay.addLCDInfo(new ThermometerLCDInfo("Bedroom         ", &bedroomThermometer));
@@ -175,6 +176,7 @@ void setupLoggers() {
     temperatureLogger.registerThermometer(&bedroomThermometer);
     temperatureLogger.registerThermometer(&kitchenThermometer);
     temperatureLogger.registerThermometer(&outsideThermometer);
+    temperatureLogger.registerThermometer(&floorHeatingThermometer);
     temperatureLogger.registerThermometer(&tankTopLevelThermometer);
     temperatureLogger.registerThermometer(&tankMidLevelThermometer);
     temperatureLogger.registerThermometer(&tankBottomLevelThermometer);
@@ -186,18 +188,18 @@ void setupLoggers() {
 
 void setupSDCard() {
     pinMode(53, OUTPUT); //SS pin
-//        digitalWrite(53, HIGH);
-    
+    //        digitalWrite(53, HIGH);
+
     if (!SD.begin(SD_CS_PIN)) {
-        lcd.clear();
-        lcd.write("SD card:");
-        lcd.setCursor(0, 1);
-        lcd.write("FAILED");
+        //lcd.clear();
+        //lcd.write("SD card:");
+        //lcd.setCursor(0, 1);
+        //lcd.write("FAILED");
     } else {
-        lcd.clear();
-        lcd.write("SD card:");
-        lcd.setCursor(0, 1);
-        lcd.write("READY");
+        //lcd.clear();
+        //lcd.write("SD card:");
+        //lcd.setCursor(0, 1);
+        //lcd.write("READY");
     }
 
     delay(500);
@@ -221,10 +223,10 @@ void setupWebServer() {
     server.registerStateUnitReplace("floorHeatingState", &floorHeatingUnit);
     server.registerStateUnitReplace("electricHeaterState", &electricHeaterUnit);
 
-    lcd.clear();
-    lcd.write("Server on:");
-    lcd.setCursor(0, 1);
-    Ethernet.localIP().printTo(lcd);
+    //lcd.clear();
+    //lcd.write("Server on:");
+    //lcd.setCursor(0, 1);
+    //Ethernet.localIP().printTo(lcd);
     delay(1000);
 }
 
@@ -232,19 +234,20 @@ void setupConfigManager() {
     configManager.registerConfigurator("bedroomMinTemp", new MinTemperatureConfigurator(&bedroomTemperatureDefinitionSource));
     configManager.registerConfigurator("bedroomMaxTemp", new MaxTemperatureConfigurator(&bedroomTemperatureDefinitionSource));
     configManager.registerConfigurator("electricHeater", &electricHeaterUnit);
+    configManager.registerConfigurator("floorHeating", &roomTempController);
 }
 
 void setupTime() {
     bool externalSet = false;
     if (externalSet) {
         tmElements_t time;
-        time.Day = 26;
-        time.Month = 7;
+        time.Day = 14;
+        time.Month = 9;
         time.Year = 2014 - 1970;
 
         time.Hour = 21;
-        time.Minute = 58;
-        time.Second = 30;
+        time.Minute = 14;
+        time.Second = 0;
         RTC.write(time);
     }
     setTime(RTC.get());
@@ -255,7 +258,7 @@ void setup() {
     Serial.begin(9600);
     analogReference(INTERNAL1V1);
 
-    setupLCDDisplay();
+    //setupLCDDisplay();
     setupTime();
     setupThreeWayValveControllers();
     setupRunTimeSources();
@@ -268,16 +271,6 @@ void setup() {
 
     pinMode(31, OUTPUT);
     digitalWrite(31, HIGH);
-
-//    for (int i = 0; i < 3; i++) {
-//        digitalWrite(FH_3VALVE_LOW_RELAY_PIN, LOW);
-//        delay(5000);
-//        digitalWrite(FH_3VALVE_LOW_RELAY_PIN, HIGH);
-//        delay(500);
-//        digitalWrite(FH_3VALVE_HIGH_RELAY_PIN, LOW);
-//        delay(5000);
-//        digitalWrite(FH_3VALVE_HIGH_RELAY_PIN, HIGH);
-//    }
 }
 
 /* Main heating process function */
@@ -301,15 +294,16 @@ void processFailsafeActions() {
     if (nextLCDRestart < millis()) {
         LCDSpecialCharacters::initSpecialCharacters(&lcd);
         lcd.begin(16, 2);
+        lcd.noBacklight();
         nextLCDRestart = millis() + 60 * 1000l;
     }
 }
 
 /* Main loop function */
 void loop() {
-    //    processFailsafeActions();
+    //processFailsafeActions();
     processHeating();
-    lcdDisplay.refresh();
+    //lcdDisplay.refresh();
     temperatureLogger.process();
     unitStateLogger.process();
     server.process();

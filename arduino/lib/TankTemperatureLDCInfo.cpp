@@ -47,7 +47,7 @@ long TankTemperatureLDCInfo::showInLCD(LCD* lcd) {
     }
 }
 
-void showTankTemperature(LCD* lcd, byte tankChar, float temperature) {
+void showTankTemperature(LCD* lcd, const char* tankChar, float temperature) {
     lcd->write(tankChar);
     lcd->print(" ");
     lcd->print(temperature);
