@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="configLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:layout_marginLeft">5dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:textColor">#ffe25d</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

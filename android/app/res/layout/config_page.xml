@@ -68,7 +68,7 @@
     </LinearLayout>
     <TextView
             android:text="@string/electric_heater"
-            android:id="@+id/electriHeaterLabel"
+            android:id="@+id/electricHeaterLabel"
             style="@style/configLabel"/>
     <LinearLayout
             android:orientation="horizontal"
@@ -112,7 +112,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/floorHeating"
+            android:text="@string/floor_heating"
             android:id="@+id/floorHeatingLabel" style="@style/configLabel"/>
     <LinearLayout
             android:orientation="horizontal"
@@ -159,8 +159,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:id="@+id/floorHeatingTime" android:text="60" android:width="100dp" android:focusable="false"
-                android:inputType="numberDecimal" android:layout_gravity="center_vertical|right"
-                android:gravity="right"/>
+                android:inputType="numberDecimal" android:layout_gravity="center_vertical"
+                android:gravity="right" android:editable="true" android:enabled="true"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

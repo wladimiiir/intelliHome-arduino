@@ -33,6 +33,8 @@ public class ConfigPage extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.config_page);
 
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+
         final SharedPreferences preferences = getApplicationContext().getSharedPreferences(Constants.SETTINGS_FILENAME, MODE_PRIVATE);
         serverIP = preferences.getString(Constants.KEY_SERVER_IP, Constants.DEFAULT_SERVERS[0]);
     }
@@ -116,7 +118,7 @@ public class ConfigPage extends Activity {
             protected Void doInBackground(String... params) {
                 if (isNetworkAvailable()) {
                     try {
-                        final URL url = new URL("http://" + serverIP + ":776/set_config?" + params[0] + '=' + params[1] + (runTimeSeconds == null ? "" : (';' + runTimeSeconds)));
+                        final URL url = new URL("http://" + serverIP + ":776/set_config?" + params[0] + '=' + params[1] + (runTimeSeconds == null ? "" : (";" + runTimeSeconds)));
                         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
                         connection.setRequestMethod("GET");
@@ -238,9 +240,9 @@ public class ConfigPage extends Activity {
 
                 parser.next();
                 final String text = parser.getText();
+                final View view = ConfigPage.this.findViewById(id);
 
-                if (id != 0) {
-                    final View view = ConfigPage.this.findViewById(id);
+                if (view != null) {
                     if (view instanceof TextView) {
                         runOnUiThread(new Runnable() {
                             @Override
@@ -252,12 +254,12 @@ public class ConfigPage extends Activity {
                 } else {
                     id = getResources().getIdentifier(key + text, "id", "sk.magiksoft.intellihome");
                     if (id != 0) {
-                        final View view = ConfigPage.this.findViewById(id);
-                        if (view instanceof RadioButton) {
+                        final View radioButton = ConfigPage.this.findViewById(id);
+                        if (radioButton instanceof RadioButton) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    ((RadioButton) view).setChecked(true);
+                                    ((RadioButton) radioButton).setChecked(true);
                                 }
                             });
                         }
