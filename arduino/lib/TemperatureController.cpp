@@ -31,7 +31,7 @@ void TemperatureController::process() {
     float temperature = thermometer->getTemperature();
 
     if (manualProcessing) {
-        if (changeTime != 0 && changeTime >= millis()) {
+        if (changeTime != 0 && millis() >= changeTime) {
             setValue(previousValue);
         }
         if (heating) {

@@ -29,7 +29,7 @@ void ConfigurableStateUnit::stop() {
 
 void ConfigurableStateUnit::process(float state) {
     if (manualProcessing) {
-        if (changeTime != 0 && changeTime >= millis()) {
+        if (changeTime != 0 && millis() >= changeTime) {
             setValue(previousValue);
         }
         return;
