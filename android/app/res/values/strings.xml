@@ -19,4 +19,6 @@
     <string name="menuvalues">value1;value2,value3</string>
     <string name="minutes">minutes</string>
     <string name="start">Start</string>
+    <string name="plus">+</string>
+    <string name="minus">-</string>
 </resources>

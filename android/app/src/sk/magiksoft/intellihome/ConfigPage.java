@@ -1,7 +1,9 @@
 package sk.magiksoft.intellihome;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -76,7 +78,7 @@ public class ConfigPage extends Activity {
     }
 
     public void setAutoTemperature(View view) {
-        setValue("bedroomMinTemp", "Auto", true);
+        setValue("bedroomMinTemp", "Auto", false);
         setValue("bedroomMaxTemp", "Auto", true);
     }
 
@@ -108,6 +110,19 @@ public class ConfigPage extends Activity {
         }
     }
 
+    private void showNoNetworkError() {
+        new AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage("No network")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
     private void setValue(String key, String value, final boolean reloadConfigValues) {
         setValue(key, value, null, reloadConfigValues);
     }
@@ -117,13 +132,15 @@ public class ConfigPage extends Activity {
             @Override
             protected Void doInBackground(String... params) {
                 if (isNetworkAvailable()) {
+                    HttpURLConnection connection = null;
                     try {
                         final URL url = new URL("http://" + serverIP + ":776/set_config?" + params[0] + '=' + params[1] + (runTimeSeconds == null ? "" : (";" + runTimeSeconds)));
-                        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection = (HttpURLConnection) url.openConnection();
 
                         connection.setRequestMethod("GET");
                         connection.connect();
-                        if (connection.getResponseCode() != 200) {
+                        connection.getInputStream();
+                        if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                             return null;
                         }
                         if (reloadConfigValues) {
@@ -131,9 +148,13 @@ public class ConfigPage extends Activity {
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } finally {
+                        if (connection != null) {
+                            connection.disconnect();
+                        }
                     }
                 } else {
-                    // display error
+                    showNoNetworkError();
                 }
                 return null;
             }
@@ -144,6 +165,17 @@ public class ConfigPage extends Activity {
         final TextView minTemp = (TextView) findViewById(R.id.bedroomMinTemp);
         final TextView maxTemp = (TextView) findViewById(R.id.bedroomMaxTemp);
 
+        increaseTemperature(minTemp, maxTemp);
+    }
+
+    public void decreaseTemperature(View view) {
+        final TextView minTemp = (TextView) findViewById(R.id.bedroomMinTemp);
+        final TextView maxTemp = (TextView) findViewById(R.id.bedroomMaxTemp);
+
+        decreaseTemperature(minTemp, maxTemp);
+    }
+
+    private void increaseTemperature(TextView minTemp, TextView maxTemp) {
         try {
             Double minValue = Double.valueOf(minTemp.getText().toString());
             Double maxValue = Double.valueOf(maxTemp.getText().toString());
@@ -153,14 +185,11 @@ public class ConfigPage extends Activity {
             minTemp.setText(minValue.toString());
             maxTemp.setText(maxValue.toString());
         } catch (NumberFormatException e) {
-            return;
+            //ignore
         }
     }
 
-    public void decreaseTemperature(View view) {
-        final TextView minTemp = (TextView) findViewById(R.id.bedroomMinTemp);
-        final TextView maxTemp = (TextView) findViewById(R.id.bedroomMaxTemp);
-
+    private void decreaseTemperature(TextView minTemp, TextView maxTemp) {
         try {
             Double minValue = Double.valueOf(minTemp.getText().toString());
             Double maxValue = Double.valueOf(maxTemp.getText().toString());
@@ -170,7 +199,7 @@ public class ConfigPage extends Activity {
             minTemp.setText(minValue.toString());
             maxTemp.setText(maxValue.toString());
         } catch (NumberFormatException e) {
-            return;
+            //ignore
         }
     }
 
@@ -181,8 +210,28 @@ public class ConfigPage extends Activity {
             final Integer runTimeSeconds = Integer.valueOf(timeField.getText().toString()) * 60;
             setValue("floorHeating", "On", runTimeSeconds, false);
         } catch (NumberFormatException e) {
-            return;
+            //ignore
         }
+    }
+
+    public void setFloorHeatingTemperature(View view) {
+        final TextView minTemp = (TextView) findViewById(R.id.floorHeatingMinTemp);
+        final TextView maxTemp = (TextView) findViewById(R.id.floorHeatingMaxTemp);
+        setValue("floorHeatingMinTemp", minTemp.getText().toString(), false);
+        setValue("floorHeatingMaxTemp", maxTemp.getText().toString(), false);
+    }
+
+    public void setAutoFloorHeatingTemperature(View view) {
+        setValue("floorHeatingMinTemp", "Auto", false);
+        setValue("floorHeatingMaxTemp", "Auto", true);
+    }
+
+    public void increaseFloorHeatingTemperature(View view) {
+        increaseTemperature((TextView) findViewById(R.id.floorHeatingMinTemp), (TextView) findViewById(R.id.floorHeatingMaxTemp));
+    }
+
+    public void decreaseFloorHeatingTemperature(View view) {
+        decreaseTemperature((TextView) findViewById(R.id.floorHeatingMinTemp), (TextView) findViewById(R.id.floorHeatingMaxTemp));
     }
 
     private class LoadConfigTask extends AsyncTask<Void, Void, Void> {
@@ -197,29 +246,39 @@ public class ConfigPage extends Activity {
                     e.printStackTrace();
                 }
             } else {
-                // display error
+                showNoNetworkError();
             }
             return null;
         }
 
         private void loadConfigData() throws IOException, XmlPullParserException {
             final URL url = new URL("http://" + serverIP + ":776/arduino_config_values");
-            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            HttpURLConnection connection = null;
 
-            connection.setRequestMethod("GET");
-            connection.connect();
-            if (connection.getResponseCode() != 200) {
-                return;
-            }
-
-            InputStream inputStream = null;
             try {
-                inputStream = connection.getInputStream();
-                processConfigXml(inputStream);
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.connect();
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    return;
                 }
+
+                InputStream inputStream = null;
+                try {
+                    inputStream = connection.getInputStream();
+                    processConfigXml(inputStream);
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if(connection != null) {
+                    connection.disconnect();
+                }
+
             }
 
         }
