@@ -79,9 +79,10 @@ RunnerUnit electricHeaterRunnerUnit(&electricHeaterRunner, &electricHeater);
 
 //floor heating components
 ThreeWayValveController floorHeatingValve(&floorHeatingThermometer, FH_3VALVE_LOW_RELAY_PIN, FH_3VALVE_HIGH_RELAY_PIN);
-DailyTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource;
+DailyTemperatureDefinitionSource autoFloorHeatingTemperatureDefinitionSource;
+ConfigurableTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource(&autoFloorHeatingTemperatureDefinitionSource);
 FloorHeatingUnit floorHeatingUnit(
-        new WaterTemperatureController(&floorHeatingValve, new SimpleTemperatureDefinitionSource(33, 34)),
+        new WaterTemperatureController(&floorHeatingValve, &floorHeatingTemperatureDefinitionSource),
         new RelayUnit(FH_PUMP_RELAY_PIN),
         new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, 35.0, 1000l * 10, 1000l * 60 * 10)
         );
@@ -123,9 +124,9 @@ void setupRunTimeSources() {
     for (int hour = 15; hour <= 23; hour++) {
         floorHeatingIdleRunner.addRunTime(hour, 0, 0, hour, 10, 0);
     }
-    electricHeaterRunner.addRunTime(MONDAY, 18, 0, 0, 19, 0, 0);
-    electricHeaterRunner.addRunTime(WEDNESDAY, 18, 0, 0, 19, 0, 0);
-    electricHeaterRunner.addRunTime(SATURDAY, 16, 0, 0, 18, 0, 0);
+//    electricHeaterRunner.addRunTime(MONDAY, 18, 0, 0, 19, 0, 0);
+//    electricHeaterRunner.addRunTime(WEDNESDAY, 18, 0, 0, 19, 0, 0);
+//    electricHeaterRunner.addRunTime(SATURDAY, 16, 0, 0, 18, 0, 0);
 }
 
 void setupTemperatureDefinitionSources() {
@@ -134,9 +135,9 @@ void setupTemperatureDefinitionSources() {
     //    roomTemperatureDefinitionSource.add(14, 0, 15, 0, 20.5, 21.0);
     //    roomTemperatureDefinitionSource.add(15, 0, 22, 0, 21.5, 22.0);
 
-    autoBedroomTemperatureDefinitionSource.add(0, 0, 6, 59, 18.5, 19.5);
-    autoBedroomTemperatureDefinitionSource.add(7, 0, 18, 59, 21.5, 22.0);
-    autoBedroomTemperatureDefinitionSource.add(19, 0, 23, 59, 18.0, 18.5);
+    autoBedroomTemperatureDefinitionSource.add(0, 0, 4, 59, 19.5, 20.5);
+    autoBedroomTemperatureDefinitionSource.add(5, 0, 18, 59, 21.7, 22.0);
+    autoBedroomTemperatureDefinitionSource.add(19, 0, 23, 59, 20.0, 21.0);
     //    autoBedroomTemperatureDefinitionSource.add(21, 0, 23, 59, 19.5, 20.0);
 
     //    roomTemperatureDefinitionSource.add(20, 0, 23, 59, 19.5, 21.0);
@@ -144,8 +145,8 @@ void setupTemperatureDefinitionSources() {
     //    roomTemperatureDefinitionSource.add(0, 0, 17, 0, 19.5, 21.0);
 
     //    floorHeatingTemperatureDefinitionSource.add(0, 0, 18, 00, 31, 34);
-    floorHeatingTemperatureDefinitionSource.add(15, 0, 23, 59, 35, 36);
-    floorHeatingTemperatureDefinitionSource.add(0, 0, 15, 0, 33, 36);
+    autoFloorHeatingTemperatureDefinitionSource.add(15, 0, 23, 59, 35, 36);
+    autoFloorHeatingTemperatureDefinitionSource.add(0, 0, 15, 0, 33, 36);
 }
 
 void setupLCDDisplay() {
@@ -233,6 +234,8 @@ void setupWebServer() {
 void setupConfigManager() {
     configManager.registerConfigurator("bedroomMinTemp", new MinTemperatureConfigurator(&bedroomTemperatureDefinitionSource));
     configManager.registerConfigurator("bedroomMaxTemp", new MaxTemperatureConfigurator(&bedroomTemperatureDefinitionSource));
+    configManager.registerConfigurator("floorHeatingMinTemp", new MinTemperatureConfigurator(&floorHeatingTemperatureDefinitionSource));
+    configManager.registerConfigurator("floorHeatingMaxTemp", new MaxTemperatureConfigurator(&floorHeatingTemperatureDefinitionSource));
     configManager.registerConfigurator("electricHeater", &electricHeaterUnit);
     configManager.registerConfigurator("floorHeating", &roomTempController);
 }
@@ -241,11 +244,11 @@ void setupTime() {
     bool externalSet = false;
     if (externalSet) {
         tmElements_t time;
-        time.Day = 14;
-        time.Month = 9;
+        time.Day = 15;
+        time.Month = 10;
         time.Year = 2014 - 1970;
 
-        time.Hour = 21;
+        time.Hour = 19;
         time.Minute = 14;
         time.Second = 0;
         RTC.write(time);

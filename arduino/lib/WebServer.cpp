@@ -48,7 +48,7 @@ void WebServer::checkCooler() {
 }
 
 void WebServer::startCooler() {
-    if(coolerStartTime == 0) {
+    if (coolerStartTime == 0) {
         digitalWrite(31, HIGH);
     }
     coolerStartTime = millis();
@@ -57,11 +57,11 @@ void WebServer::startCooler() {
 void WebServer::process() {
     EthernetClient client = server->available();
 
-//    checkCooler();
+    //    checkCooler();
     if (!client) {
         return;
     }
-//    startCooler();
+    //    startCooler();
     if (!checkAuthentication(client)) {
         return;
     }
@@ -240,9 +240,22 @@ void WebServer::setConfigValues(EthernetClient client) {
 }
 
 void WebServer::setConfig(EthernetClient client, String key, String value) {
+    client.println("Content-Type: text/html");
+    client.println();
+    client.print("<html>");
+    client.print("<head>");
+    client.print("</head>");
+    client.print("<body>");
+
     if (configManager != NULL) {
         configManager->setValue(key, value);
+        client.print("OK");
+    } else {
+        client.print("No place to set.");
     }
+
+    client.print("</body>");
+    client.print("</html>");
 }
 
 String getMimeType(String fileName) {
