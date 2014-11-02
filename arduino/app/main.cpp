@@ -16,7 +16,8 @@
 #include "../lib/ConfigurableStateUnit.h"
 #include "../lib/FloorHeatingUnit.h"
 #include "../lib/WaterTemperatureController.h"
-#include "../lib/TemperatureController.h"
+#include "../lib/HeaterController.h"
+#include "../lib/CoolerController.h"
 #include "../lib/RunnerUnit.h"
 #include "../lib/StartStopUnit.h"
 #include "../lib/ElectricHeaterUnit.h"
@@ -31,6 +32,7 @@
 #include "../lib/ConfigManager.h"
 #include "../lib/MinTemperatureConfigurator.h"
 #include "../lib/MaxTemperatureConfigurator.h"
+#include "../lib/NTPUtils.h"
 
 #define SD_CS_PIN                        4
 
@@ -40,6 +42,7 @@
 #define FH_3VALVE_LOW_RELAY_PIN         3
 #define FH_3VALVE_HIGH_RELAY_PIN        5
 #define FH_PUMP_RELAY_PIN               6
+#define FIREPLACE_EXCHANGER_RELAY_PIN   9
 
 #define IR_REMOTE_PIN                   12
 
@@ -70,11 +73,16 @@ D18B20Thermometer bedroomThermometer(&oneWireSensorProvider, &bedroomThermometer
 D18B20Thermometer kitchenThermometer(&oneWireSensorProvider, &kitchenThermometerAddress);
 D18B20Thermometer fireplaceExchangerThermometer(&oneWireSensorProvider, &fireplaceExchangerThermometerAddress);
 
+//fireplace
+ConfigurableTemperatureDefinitionSource fireplaceTemperatureDefinitionSource(new SimpleTemperatureDefinitionSource(50, 55));
+RelayUnit fireplaceRelay(FIREPLACE_EXCHANGER_RELAY_PIN);
+CoolerController fireplaceController(&fireplaceExchangerThermometer, &fireplaceTemperatureDefinitionSource, &fireplaceRelay);
+
 //electric heater
 WeeklyRunStrategy electricHeaterRunner;
 RelayUnit electricHeaterRelay(ELECTRIC_HEATER_RELAY_PIN);
 ConfigurableStateUnit electricHeaterUnit(&electricHeaterRelay);
-ElectricHeaterUnit electricHeater(&tankTopLevelThermometer, &electricHeaterUnit, 41.0);
+ElectricHeaterUnit electricHeater(&tankTopLevelThermometer, &electricHeaterUnit, new SimpleTemperatureDefinitionSource(41, 41));
 RunnerUnit electricHeaterRunnerUnit(&electricHeaterRunner, &electricHeater);
 
 //floor heating components
@@ -84,15 +92,14 @@ ConfigurableTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource(
 FloorHeatingUnit floorHeatingUnit(
         new WaterTemperatureController(&floorHeatingValve, &floorHeatingTemperatureDefinitionSource),
         new RelayUnit(FH_PUMP_RELAY_PIN),
-        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, 35.0, 1000l * 10, 1000l * 60 * 10)
+        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, &floorHeatingTemperatureDefinitionSource)
         );
 DailyTemperatureDefinitionSource autoBedroomTemperatureDefinitionSource;
 ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(&autoBedroomTemperatureDefinitionSource);
-//ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(new SimpleTemperatureDefinitionSource(20.5, 21.0));
 DailyRunStrategy floorHeatingIdleRunner;
 
 //main temperature controller
-TemperatureController roomTempController(
+HeaterController roomTempController(
         &bedroomThermometer,
         &bedroomTemperatureDefinitionSource,
         new StartStopUnit(&floorHeatingUnit, MINUTE(20), MINUTE(5)),
@@ -196,11 +203,13 @@ void setupSDCard() {
         //lcd.write("SD card:");
         //lcd.setCursor(0, 1);
         //lcd.write("FAILED");
+        Serial.println("FAILED");
     } else {
         //lcd.clear();
         //lcd.write("SD card:");
         //lcd.setCursor(0, 1);
         //lcd.write("READY");
+        Serial.println("SUCCESS");
     }
 
     delay(500);
@@ -223,11 +232,13 @@ void setupWebServer() {
 
     server.registerStateUnitReplace("floorHeatingState", &floorHeatingUnit);
     server.registerStateUnitReplace("electricHeaterState", &electricHeaterUnit);
+    server.registerStateUnitReplace("fireplaceExchangerState", &fireplaceRelay);
 
     //lcd.clear();
     //lcd.write("Server on:");
     //lcd.setCursor(0, 1);
     //Ethernet.localIP().printTo(lcd);
+    Ethernet.localIP().printTo(Serial);
     delay(1000);
 }
 
@@ -244,16 +255,18 @@ void setupTime() {
     bool externalSet = false;
     if (externalSet) {
         tmElements_t time;
-        time.Day = 15;
-        time.Month = 10;
+        time.Day = 1;
+        time.Month = 11;
         time.Year = 2014 - 1970;
 
-        time.Hour = 19;
-        time.Minute = 14;
+        time.Hour = 14;
+        time.Minute = 0;
         time.Second = 0;
-        RTC.write(time);
+//        RTC.write(time);
+        setTime(time.Hour, time.Minute, time.Second, time.Day, time.Month, 2014);
     }
-    setTime(RTC.get());
+    setTime(NTPUtils::getNTPTime());
+//    setTime(RTC.get());
 }
 
 /* Main setup function */
@@ -262,7 +275,6 @@ void setup() {
     analogReference(INTERNAL1V1);
 
     //setupLCDDisplay();
-    setupTime();
     setupThreeWayValveControllers();
     setupRunTimeSources();
     setupTemperatureDefinitionSources();
@@ -270,6 +282,7 @@ void setup() {
     setupSDCard();
     setupConfigManager();
     setupWebServer();
+    setupTime();
     oneWireSensorProvider.printAddresses();
 
     pinMode(31, OUTPUT);
@@ -302,10 +315,31 @@ void processFailsafeActions() {
     }
 }
 
+/* Fireplace exchanger process function (gaining energy from wood) */
+void processFireplaceExchanger() {
+    fireplaceController.process();
+}
+
+void printTemperatures() {
+    Serial.println(hour());
+    Serial.println(minute());
+    Serial.println(second());
+    Serial.println(bedroomThermometer.getTemperature());
+    Serial.println(kitchenThermometer.getTemperature());
+    Serial.println(outsideThermometer.getTemperature());
+    Serial.println(tankTopLevelThermometer.getTemperature());
+    Serial.println(tankMidLevelThermometer.getTemperature());
+    Serial.println(tankBottomLevelThermometer.getTemperature());
+    Serial.println(fireplaceExchangerThermometer.getTemperature());
+    Serial.println(floorHeatingThermometer.getTemperature());
+}
+
 /* Main loop function */
 void loop() {
     //processFailsafeActions();
     processHeating();
+//    printTemperatures();
+    processFireplaceExchanger();
     //lcdDisplay.refresh();
     temperatureLogger.process();
     unitStateLogger.process();

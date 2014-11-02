@@ -11,29 +11,23 @@
 #include <Arduino.h>
 #include "StateUnit.h"
 #include "Thermometer.h"
+#include "TemperatureDefinitionSource.h"
 
 #define RUN_TIME    (1000l * 10)
 #define STOP_TIME    (1000l * 60 * 10)
 
 class ElectricHeaterUnit : public StateUnit {
 public:
-    ElectricHeaterUnit(Thermometer* tankThermometer, StateUnit* controlRelay, float temperature, unsigned long runTime = 0, unsigned long stopTime = 0);
+    ElectricHeaterUnit(Thermometer* thermometer, StateUnit* controlRelay, TemperatureDefinitionSource* temperatureDefinition);
     void start();
     void stop();
     void process(float state);
     State getState();
 private:
-    Thermometer* tankThermometer;
+    Thermometer* thermometer;
     StateUnit* controlUnit;
-    float temperature;
+    TemperatureDefinitionSource* temperatureDefinition;
 
-    unsigned long runTime;
-    unsigned long stopTime;
-
-    unsigned long startedTime;
-    unsigned long stoppedTime;
-    bool heating;
-    
     bool shouldRun();
 };
 

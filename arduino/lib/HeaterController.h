@@ -15,9 +15,9 @@
 #include "TemperatureDefinitionSource.h"
 #include "Configurator.h"
 
-class TemperatureController : public Configurator {
+class HeaterController : public Configurator {
 public:
-    TemperatureController(Thermometer* thermometer, TemperatureDefinitionSource* temperatureDefinitionSource, StateUnit* heatingUnit, StateUnit* idleControlUnit);
+    HeaterController(Thermometer* thermometer, TemperatureDefinitionSource* temperatureDefinitionSource, StateUnit* heatingUnit, StateUnit* idleControlUnit);
     void process();
     void setValue(String value);
     String getValue();

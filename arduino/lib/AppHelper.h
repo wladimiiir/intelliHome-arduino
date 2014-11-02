@@ -13,6 +13,7 @@
 
 class AppHelper {
 public:
+
     static const String getDateString() {
         String date = "";
 
@@ -58,7 +59,7 @@ public:
         strValue += (int) value;
         strValue += ".";
         int afterSeparator = (int) ((value - (int) value) * 100);
-        if(afterSeparator < 10) {
+        if (afterSeparator < 10) {
             strValue += "0";
         }
         strValue += afterSeparator;
@@ -79,6 +80,12 @@ public:
             }
         }
         return value.length() > 0 && value.charAt(value.length() - 1) != '.';
+    }
+
+    static float calculateState(float lowTemperature, float highTemperature, float temperature) {
+        float state = (temperature - lowTemperature) / (highTemperature - lowTemperature) * 100;
+        state = 100 - constrain(state, 0, 100);
+        return state;
     }
 };
 

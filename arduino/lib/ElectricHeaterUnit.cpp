@@ -6,56 +6,31 @@
  */
 
 #include "ElectricHeaterUnit.h"
-#include "RelayUnit.h"
 
-ElectricHeaterUnit::ElectricHeaterUnit(Thermometer* tankThermometer, StateUnit* controlUnit, float temperature, unsigned long runTime, unsigned long stopTime) :
-tankThermometer(tankThermometer),
+ElectricHeaterUnit::ElectricHeaterUnit(Thermometer* thermometer, StateUnit* controlUnit, TemperatureDefinitionSource* temperatureDefinition) :
+thermometer(thermometer),
 controlUnit(controlUnit),
-temperature(temperature),
-runTime(runTime),
-stopTime(stopTime) {
-    startedTime = 0;
-    stoppedTime = 0;
-    heating = false;
+temperatureDefinition(temperatureDefinition) {
 }
 
 bool ElectricHeaterUnit::shouldRun() {
-    if (tankThermometer->getTemperature() < temperature) {
-        heating = true;
+    if (getState() == STOPPED
+            && thermometer->getTemperature() < temperatureDefinition->getMaxTemperature()) {
         return true;
     }
-    if (heating && tankThermometer->getTemperature() < temperature + 1) {
+    if (getState() == STARTED
+            && thermometer->getTemperature() < temperatureDefinition->getMaxTemperature() + 1) {
         return true;
     }
-
-    if (stopTime != 0 && startedTime == 0 && millis() - stoppedTime >= stopTime) {
-        startedTime = millis();
-        stoppedTime = 0;
-        heating = false;
-        return true;
-    }
-
-    if (runTime != 0 && stoppedTime == 0 && millis() - startedTime >= runTime) {
-        startedTime = 0;
-        stoppedTime = millis();
-        heating = false;
-        return false;
-    }
-
-    return startedTime != 0;
+    return false;
 }
 
 void ElectricHeaterUnit::start() {
     controlUnit->start();
-    startedTime = millis();
-    stoppedTime = 0;
 }
 
 void ElectricHeaterUnit::stop() {
     controlUnit->stop();
-    startedTime = 0;
-    stoppedTime = 0;
-    heating = false;
 }
 
 void ElectricHeaterUnit::process(float state) {
@@ -67,5 +42,5 @@ void ElectricHeaterUnit::process(float state) {
 }
 
 State ElectricHeaterUnit::getState() {
-    return startedTime == 0 ? STOPPED : STARTED;
+    return controlUnit->getState();
 }

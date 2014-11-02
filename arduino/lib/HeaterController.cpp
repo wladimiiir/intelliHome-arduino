@@ -5,12 +5,13 @@
  * Created on December 23, 2013, 9:35 PM
  */
 
-#include "TemperatureController.h"
+#include "HeaterController.h"
 #include "TemperatureDefinitionSource.h"
+#include "AppHelper.h"
 #include <StandardCplusplus.h>
 #include <vector>
 
-TemperatureController::TemperatureController(
+HeaterController::HeaterController(
         Thermometer* thermometer,
         TemperatureDefinitionSource* temperatureDefinitionSource,
         StateUnit* heatingUnit,
@@ -27,7 +28,7 @@ previousValue("Auto"),
 value("Auto") {
 }
 
-void TemperatureController::process() {
+void HeaterController::process() {
     float temperature = thermometer->getTemperature();
 
     if (manualProcessing) {
@@ -53,7 +54,7 @@ void TemperatureController::process() {
     }
 }
 
-void TemperatureController::setValue(String value) {
+void HeaterController::setValue(String value) {
     this->previousValue = this->value;
     int separatorIndex = value.indexOf(';');
     unsigned long forSeconds = separatorIndex > 0 ? atol(value.substring(separatorIndex + 1).c_str()) : 0;
@@ -73,27 +74,21 @@ void TemperatureController::setValue(String value) {
     changeTime = forSeconds == 0 ? 0 : (millis() + forSeconds * 1000);
 }
 
-String TemperatureController::getValue() {
+String HeaterController::getValue() {
     return value;
 }
 
-void TemperatureController::startHeatingUnit() {
+void HeaterController::startHeatingUnit() {
     heating = true;
     heatingUnit->start();
 }
 
-void TemperatureController::stopHeatingUnit() {
+void HeaterController::stopHeatingUnit() {
     heating = false;
     heatingUnit->stop();
 }
 
-float calculateState(float lowTemperature, float highTemperature, float temperature) {
-    float state = (temperature - lowTemperature) / (highTemperature - lowTemperature) * 100;
-    state = 100 - constrain(state, 0, 100);
-    return state;
-}
-
-void TemperatureController::processHeatingUnit(float temperature) {
+void HeaterController::processHeatingUnit(float temperature) {
     float minTemperature;
     if (idleControlUnit != NULL) {
         minTemperature = (temperatureDefinitionSource->getMinTemperature() + temperatureDefinitionSource->getMaxTemperature()) / 2;
@@ -101,27 +96,27 @@ void TemperatureController::processHeatingUnit(float temperature) {
         minTemperature = temperatureDefinitionSource->getMinTemperature();
     }
 
-    heatingUnit->process(calculateState(minTemperature, temperatureDefinitionSource->getMaxTemperature(), temperature));
+    heatingUnit->process(manualProcessing ? 100 : AppHelper::calculateState(minTemperature, temperatureDefinitionSource->getMaxTemperature(), temperature));
 }
 
-void TemperatureController::startIdleControlUnit() {
+void HeaterController::startIdleControlUnit() {
     if (idleControlUnit == NULL)
         return;
     idleControlUnit->start();
 }
 
-void TemperatureController::stopIdleControlUnit() {
+void HeaterController::stopIdleControlUnit() {
     if (idleControlUnit == NULL)
         return;
     idleControlUnit->stop();
 }
 
-void TemperatureController::processIdleControlUnit(float temperature) {
+void HeaterController::processIdleControlUnit(float temperature) {
     if (idleControlUnit == NULL)
         return;
     //    if (temperature > temperatureDefinitionSource->getMaxTemperature()) {
     //        idleControlUnit->stop();
     //        return;
     //    }
-    idleControlUnit->process(calculateState(temperatureDefinitionSource->getMinTemperature(), temperatureDefinitionSource->getMaxTemperature(), temperature));
+    idleControlUnit->process(AppHelper::calculateState(temperatureDefinitionSource->getMinTemperature(), temperatureDefinitionSource->getMaxTemperature(), temperature));
 }
