@@ -11,14 +11,13 @@
 #include <Arduino.h>
 #include "StateUnit.h"
 
+#define SECOND(s) (s * 1000l)
 #define MINUTE(m) (m * 1000l * 60)
 
 class StartStopUnit : public StateUnit {
 public:
     StartStopUnit(StateUnit* unit, long maxRunTime, long stopTime);
-    void setMaxRunTime(long runTime);
-    void setStopTime(long restTime);
-    bool isStopped();
+    void setRestingDisabled(bool disabled);
     void start();
     void stop();
     void process(float state);
@@ -26,12 +25,13 @@ public:
 private:
     StateUnit* unit;
     long maxRunTime;
-    long stopTime;
+    long restTime;
+    bool restingDisabled;
 
-    bool stopped;
-    unsigned long runningTime;
+    bool resting;
+    unsigned long startedTime;
     unsigned long stoppedTime;
-    bool shouldStop();
+    bool shouldRest();
     bool shouldStart();
 };
 

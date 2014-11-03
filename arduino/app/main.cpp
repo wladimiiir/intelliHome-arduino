@@ -92,7 +92,7 @@ ConfigurableTemperatureDefinitionSource floorHeatingTemperatureDefinitionSource(
 FloorHeatingUnit floorHeatingUnit(
         new WaterTemperatureController(&floorHeatingValve, &floorHeatingTemperatureDefinitionSource),
         new RelayUnit(FH_PUMP_RELAY_PIN),
-        new ElectricHeaterUnit(&tankMidLevelThermometer, &electricHeaterUnit, &floorHeatingTemperatureDefinitionSource)
+        new ElectricHeaterUnit(&tankMidLevelThermometer, new StartStopUnit(&electricHeaterUnit, SECOND(10), MINUTE(10)), &floorHeatingTemperatureDefinitionSource)
         );
 DailyTemperatureDefinitionSource autoBedroomTemperatureDefinitionSource;
 ConfigurableTemperatureDefinitionSource bedroomTemperatureDefinitionSource(&autoBedroomTemperatureDefinitionSource);

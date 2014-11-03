@@ -28,7 +28,7 @@ private:
     StateUnit* controlUnit;
     TemperatureDefinitionSource* temperatureDefinition;
 
-    bool shouldRun();
+    bool shouldHeat();
 };
 
 #endif	/* ELECTRICHEATERUNIT_H */

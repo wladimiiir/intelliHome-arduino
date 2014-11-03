@@ -6,6 +6,7 @@
  */
 
 #include "ElectricHeaterUnit.h"
+#include "StartStopUnit.h"
 
 ElectricHeaterUnit::ElectricHeaterUnit(Thermometer* thermometer, StateUnit* controlUnit, TemperatureDefinitionSource* temperatureDefinition) :
 thermometer(thermometer),
@@ -13,7 +14,7 @@ controlUnit(controlUnit),
 temperatureDefinition(temperatureDefinition) {
 }
 
-bool ElectricHeaterUnit::shouldRun() {
+bool ElectricHeaterUnit::shouldHeat() {
     if (getState() == STOPPED
             && thermometer->getTemperature() < temperatureDefinition->getMaxTemperature()) {
         return true;
@@ -22,6 +23,7 @@ bool ElectricHeaterUnit::shouldRun() {
             && thermometer->getTemperature() < temperatureDefinition->getMaxTemperature() + 1) {
         return true;
     }
+
     return false;
 }
 
@@ -34,10 +36,10 @@ void ElectricHeaterUnit::stop() {
 }
 
 void ElectricHeaterUnit::process(float state) {
-    if (shouldRun()) {
+    if (shouldHeat()) {
         controlUnit->start();
     } else {
-        controlUnit->stop();
+        controlUnit->process(state);
     }
 }
 

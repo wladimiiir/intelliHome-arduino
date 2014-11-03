@@ -10,55 +10,55 @@
 StartStopUnit::StartStopUnit(StateUnit* unit, long maxRunTime, long restTime) :
 unit(unit),
 maxRunTime(maxRunTime),
-stopTime(restTime),
-stopped(false) {
-    runningTime = 0;
+restTime(restTime),
+restingDisabled(false),
+resting(false) {
+    startedTime = 0;
     stoppedTime = 0;
 }
 
-void StartStopUnit::setMaxRunTime(long runTime) {
-    maxRunTime = runTime;
+void StartStopUnit::setRestingDisabled(bool disabled) {
+    restingDisabled = disabled;
 }
 
-void StartStopUnit::setStopTime(long restTime) {
-    this->stopTime = restTime;
-}
-
-bool StartStopUnit::shouldStop() {
-    return runningTime != 0 && millis() > runningTime + maxRunTime;
+bool StartStopUnit::shouldRest() {
+    return startedTime != 0 && millis() > startedTime + maxRunTime;
 }
 
 bool StartStopUnit::shouldStart() {
-    return millis() > stoppedTime + stopTime;
+    return millis() > stoppedTime + restTime;
 }
 
 void StartStopUnit::start() {
     unit->start();
-    runningTime = millis();
-    stopped = false;
+    startedTime = millis();
+    resting = false;
 }
 
 void StartStopUnit::stop() {
     unit->stop();
-    runningTime = 0;
-    stopped = false;
+    startedTime = 0;
+    resting = false;
 }
 
 void StartStopUnit::process(float state) {
-    if (!stopped && shouldStop()) {
-        stop();
-        stoppedTime = millis();
-        stopped = true;
-    } else if (stopped && shouldStart()) {
+    if (restingDisabled) {
         start();
         unit->process(state);
-        stopped = false;
-    } else if (!stopped) {
+    } else if (!resting && shouldRest()) {
+        stop();
+        stoppedTime = millis();
+        resting = true;
+    } else if (resting && shouldStart()) {
+        start();
+        unit->process(state);
+        resting = false;
+    } else if (!resting) {
         unit->process(state);
     }
 }
 
 State StartStopUnit::getState() {
-    return runningTime != 0 ? STARTED : STOPPED;
+    return startedTime != 0 ? STARTED : STOPPED;
 }
 
